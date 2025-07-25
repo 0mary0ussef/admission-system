@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+/* Custom Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f3f4f6; /* light gray, matches your site background */
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ef3131; /* your brand red */
+  border-radius: 8px;
+  border: 2px solid #f3f4f6; /* creates a gap effect */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #c41e1e; /* darker red on hover */
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #ef3131 #f3f4f6;
+}
