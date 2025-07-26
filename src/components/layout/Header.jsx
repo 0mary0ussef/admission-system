@@ -1,17 +1,29 @@
 "use client";
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import Button from "../ui/Button";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
+  const isActive = (path) => {
+    return location.pathname === path;
+  };
 
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <Link to="/" className="flex items-center">
+          <Link to="/" className="flex items-center" onClick={scrollToTop}>
             <div className="w-10 h-10 bg-[#ef3131] rounded-lg flex items-center justify-center">
               <svg
                 className="h-6 w-6 text-white"
@@ -45,13 +57,23 @@ const Header = () => {
           <div className="hidden md:flex items-center space-x-8">
             <Link
               to="/"
-              className="text-gray-700 hover:text-[#ef3131] font-medium transition-colors"
+              onClick={scrollToTop}
+              className={`font-medium transition-colors relative ${
+                isActive("/")
+                  ? "text-[#ef3131] after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-[#ef3131]"
+                  : "text-gray-700 hover:text-[#ef3131]"
+              }`}
             >
               Home
             </Link>
             <Link
               to="/contact"
-              className="text-gray-700 hover:text-[#ef3131] font-medium transition-colors"
+              onClick={scrollToTop}
+              className={`font-medium transition-colors relative ${
+                isActive("/contact")
+                  ? "text-[#ef3131] after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-[#ef3131]"
+                  : "text-gray-700 hover:text-[#ef3131]"
+              }`}
             >
               Contact
             </Link>
@@ -112,15 +134,29 @@ const Header = () => {
             <div className="px-2 pt-2 pb-3 space-y-1">
               <Link
                 to="/"
-                className="block px-3 py-2 text-gray-700 hover:text-[#ef3131] font-medium transition-colors"
-                onClick={() => setIsMenuOpen(false)}
+                className={`block px-3 py-2 font-medium transition-colors relative ${
+                  isActive("/")
+                    ? "text-[#ef3131] after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-[#ef3131]"
+                    : "text-gray-700 hover:text-[#ef3131]"
+                }`}
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  scrollToTop();
+                }}
               >
                 Home
               </Link>
               <Link
                 to="/contact"
-                className="block px-3 py-2 text-gray-700 hover:text-[#ef3131] font-medium transition-colors"
-                onClick={() => setIsMenuOpen(false)}
+                className={`block px-3 py-2 font-medium transition-colors relative ${
+                  isActive("/contact")
+                    ? "text-[#ef3131] after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-[#ef3131]"
+                    : "text-gray-700 hover:text-[#ef3131]"
+                }`}
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  scrollToTop();
+                }}
               >
                 Contact
               </Link>

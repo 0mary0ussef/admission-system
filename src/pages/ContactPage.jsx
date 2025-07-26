@@ -99,6 +99,7 @@ const ContactPage = () => {
                         placeholder="Enter your first name"
                         value={formData.firstName}
                         onChange={handleChange}
+                        validation={{ name: true }}
                         required
                       />
                     </div>
@@ -109,6 +110,7 @@ const ContactPage = () => {
                         placeholder="Enter your last name"
                         value={formData.lastName}
                         onChange={handleChange}
+                        validation={{ name: true }}
                         required
                       />
                     </div>
@@ -130,9 +132,11 @@ const ContactPage = () => {
                     <Label htmlFor="phone">Phone Number</Label>
                     <Input
                       id="phone"
+                      type="tel"
                       placeholder="Enter your phone number"
                       value={formData.phone}
                       onChange={handleChange}
+                      validation={{ phone: true }}
                       required
                     />
                   </div>
@@ -144,6 +148,7 @@ const ContactPage = () => {
                       placeholder="What is this regarding?"
                       value={formData.subject}
                       onChange={handleChange}
+                      validation={{ minLength: 3, maxLength: 100 }}
                       required
                     />
                   </div>
@@ -153,16 +158,18 @@ const ContactPage = () => {
                     <Textarea
                       id="message"
                       placeholder="Tell us more about your inquiry..."
-                      rows={5}
+                      rows={8}
                       value={formData.message}
                       onChange={handleChange}
+                      validation={{ minLength: 10, maxLength: 1000 }}
+                      className="min-h-[120px] max-h-[300px] resize-y"
                       required
                     />
                   </div>
 
                   <Button
                     type="submit"
-                    className="w-full bg-[#ef3131] hover:bg-red-600 rounded-full font-semibold"
+                    className="w-full bg-[#ef3131] hover:bg-red-600 rounded-full font-semibold py-3 text-lg"
                   >
                     Send Message
                   </Button>
@@ -195,9 +202,7 @@ const ContactPage = () => {
                     </svg>
                     <div>
                       <p className="font-medium">Email</p>
-                      <p className="text-gray-600">
-                        info@elsewedy-school.edu.eg
-                      </p>
+                      <p className="text-gray-600">elsewedy.iats@gmail.com</p>
                     </div>
                   </div>
 
@@ -217,7 +222,7 @@ const ContactPage = () => {
                     </svg>
                     <div>
                       <p className="font-medium">Phone</p>
-                      <p className="text-gray-600">+20 123 456 7890</p>
+                      <p className="text-gray-600">+20 1289007669</p>
                     </div>
                   </div>
 
@@ -244,11 +249,12 @@ const ContactPage = () => {
                     <div>
                       <p className="font-medium">Address</p>
                       <p className="text-gray-600">
-                        El Sewedy International School
+                        New Zahraa October City, Sector D, Sidik El-Manshawi
+                        Street,
                         <br />
-                        New Administrative Capital
+                        next to Sector D Center and Talaat Harb School,
                         <br />
-                        Cairo, Egypt
+                        Giza Governorate, Egypt.
                       </p>
                     </div>
                   </div>
@@ -269,11 +275,7 @@ const ContactPage = () => {
                     </svg>
                     <div>
                       <p className="font-medium">Office Hours</p>
-                      <p className="text-gray-600">
-                        Sunday - Thursday: 8:00 AM - 4:00 PM
-                        <br />
-                        Friday - Saturday: Closed
-                      </p>
+                      <p className="text-gray-600">7:15am - 3:50pm</p>
                     </div>
                   </div>
                 </CardContent>

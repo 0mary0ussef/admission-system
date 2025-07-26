@@ -37,6 +37,10 @@ const VerifyStudentPage = () => {
     const validIds = ["12345678901234", "98765432109876"]; // Mock valid IDs
 
     if (validIds.includes(nationalId)) {
+      // Set student token in localStorage
+      localStorage.setItem("studentToken", "verified");
+      localStorage.setItem("studentNationalId", nationalId);
+
       // Student found, redirect to exam
       navigate("/exam");
     } else {
@@ -114,6 +118,8 @@ const VerifyStudentPage = () => {
                   placeholder="Enter your 14-digit National ID"
                   className="mt-2 h-12 text-lg"
                   maxLength={14}
+                  validation={{ nationalId: true }}
+                  showValidation={true}
                 />
                 <p className="text-sm text-gray-500 mt-2">
                   {nationalId.length}/14 digits

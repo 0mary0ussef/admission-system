@@ -46,7 +46,7 @@ const HomePage = () => {
 
       {/* Hero Section */}
       <section
-        className="relative min-h-[70vh] md:min-h-[80vh] flex items-center justify-center overflow-hidden"
+        className="relative min-h-[90vh] md:min-h-[100vh] flex items-center justify-center overflow-hidden"
         style={{
           backgroundImage: "url('/sewedy.png')",
           backgroundSize: "cover",

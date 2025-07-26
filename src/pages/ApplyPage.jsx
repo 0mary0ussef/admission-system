@@ -106,6 +106,8 @@ const ApplyPage = () => {
                       onChange={(e) => setNationalId(e.target.value)}
                       placeholder="Enter your 14-digit National ID"
                       maxLength={14}
+                      validation={{ nationalId: true }}
+                      showValidation={true}
                     />
                   </div>
 
@@ -137,7 +139,7 @@ const ApplyPage = () => {
     <div className="min-h-screen bg-gray-50">
       <Header />
       <div className="py-12">
-        <div className="max-w-2xl mx-auto px-4">
+        <div className="max-w-4xl mx-auto px-4">
           <Link
             to="/"
             className="inline-flex items-center text-[#ef3131] hover:underline mb-6"
@@ -180,6 +182,8 @@ const ApplyPage = () => {
                         onChange={(e) =>
                           handleInputChange("name", e.target.value)
                         }
+                        placeholder="Enter your full name"
+                        validation={{ name: true }}
                         required
                       />
                     </div>
@@ -192,6 +196,19 @@ const ApplyPage = () => {
                         onChange={(e) =>
                           handleInputChange("dateOfBirth", e.target.value)
                         }
+                        validation={{
+                          date: true,
+                          pastDate: true,
+                          custom: (value) => {
+                            if (!value) return true;
+                            const age =
+                              new Date().getFullYear() -
+                              new Date(value).getFullYear();
+                            return age >= 5 && age <= 18
+                              ? true
+                              : "Student must be between 5 and 18 years old";
+                          },
+                        }}
                         required
                       />
                     </div>
@@ -204,6 +221,7 @@ const ApplyPage = () => {
                         onChange={(e) =>
                           handleInputChange("email", e.target.value)
                         }
+                        placeholder="Enter your email address"
                         required
                       />
                     </div>
@@ -211,10 +229,13 @@ const ApplyPage = () => {
                       <Label htmlFor="phone">Phone Number</Label>
                       <Input
                         id="phone"
+                        type="tel"
                         value={formData.phone}
                         onChange={(e) =>
                           handleInputChange("phone", e.target.value)
                         }
+                        placeholder="Enter your phone number"
+                        validation={{ phone: true }}
                         required
                       />
                     </div>
@@ -227,6 +248,8 @@ const ApplyPage = () => {
                       onChange={(e) =>
                         handleInputChange("address", e.target.value)
                       }
+                      placeholder="Enter your full address"
+                      validation={{ minLength: 10, maxLength: 200 }}
                       required
                     />
                   </div>
@@ -246,6 +269,8 @@ const ApplyPage = () => {
                         onChange={(e) =>
                           handleInputChange("parentName", e.target.value)
                         }
+                        placeholder="Enter parent/guardian full name"
+                        validation={{ name: true }}
                         required
                       />
                     </div>
@@ -253,10 +278,13 @@ const ApplyPage = () => {
                       <Label htmlFor="parentPhone">Parent Phone</Label>
                       <Input
                         id="parentPhone"
+                        type="tel"
                         value={formData.parentPhone}
                         onChange={(e) =>
                           handleInputChange("parentPhone", e.target.value)
                         }
+                        placeholder="Enter parent phone number"
+                        validation={{ phone: true }}
                         required
                       />
                     </div>
@@ -269,6 +297,7 @@ const ApplyPage = () => {
                         onChange={(e) =>
                           handleInputChange("parentEmail", e.target.value)
                         }
+                        placeholder="Enter parent email address"
                         required
                       />
                     </div>
@@ -289,6 +318,8 @@ const ApplyPage = () => {
                         onChange={(e) =>
                           handleInputChange("previousSchool", e.target.value)
                         }
+                        placeholder="Enter your previous school name"
+                        validation={{ minLength: 2, maxLength: 100 }}
                         required
                       />
                     </div>
@@ -303,6 +334,7 @@ const ApplyPage = () => {
                         onChange={(e) =>
                           handleInputChange("mathGrade", e.target.value)
                         }
+                        placeholder="Enter math grade (0-100)"
                         required
                       />
                     </div>
@@ -319,6 +351,7 @@ const ApplyPage = () => {
                         onChange={(e) =>
                           handleInputChange("englishGrade", e.target.value)
                         }
+                        placeholder="Enter English grade (0-100)"
                         required
                       />
                     </div>
@@ -335,6 +368,7 @@ const ApplyPage = () => {
                         onChange={(e) =>
                           handleInputChange("arabicGrade", e.target.value)
                         }
+                        placeholder="Enter Arabic grade (0-100)"
                         required
                       />
                     </div>

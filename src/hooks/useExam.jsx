@@ -149,5 +149,7 @@ export const useExam = () => {
     nextQuestion,
     prevQuestion,
     calculateScore,
+    setCurrentSection,
+    setCurrentQuestion,
   };
 };

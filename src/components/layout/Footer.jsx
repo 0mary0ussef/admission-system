@@ -20,7 +20,7 @@ const Footer = () => {
             </h3>
             <div className="flex justify-center space-x-4 md:space-x-6">
               <a
-                href="https://facebook.com"
+                href="https://www.facebook.com/profile.php?id=100083837165938"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 md:w-12 md:h-12 bg-white/10 rounded-full flex items-center justify-center hover:bg-[#ef3131] transition-colors duration-300"
@@ -34,7 +34,7 @@ const Footer = () => {
                 </svg>
               </a>
               <a
-                href="https://instagram.com"
+                href="https://www.instagram.com/elsewedyiats?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 md:w-12 md:h-12 bg-white/10 rounded-full flex items-center justify-center hover:bg-[#ef3131] transition-colors duration-300"
@@ -48,7 +48,7 @@ const Footer = () => {
                 </svg>
               </a>
               <a
-                href="https://linkedin.com"
+                href="https://www.linkedin.com/company/el-sewedy-iats/posts/?feedView=all"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 md:w-12 md:h-12 bg-white/10 rounded-full flex items-center justify-center hover:bg-[#ef3131] transition-colors duration-300"

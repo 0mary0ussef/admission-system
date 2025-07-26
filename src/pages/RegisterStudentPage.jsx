@@ -63,14 +63,13 @@ const RegisterStudentPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <Header />
-
-      <div className="py-8 md:py-12">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="py-12">
+        <div className="max-w-2xl mx-auto px-4">
           <Link
             to="/apply-options"
-            className="inline-flex items-center text-[#ef3131] hover:underline mb-6 md:mb-8 font-medium"
+            className="inline-flex items-center text-[#ef3131] hover:underline mb-8 font-medium"
           >
             <svg
               className="h-4 w-4 mr-2"
@@ -88,11 +87,11 @@ const RegisterStudentPage = () => {
             Back to Application Options
           </Link>
 
-          <Card className="border-0 smooth-shadow">
-            <CardHeader className="text-center pb-6 md:pb-8">
-              <div className="w-16 h-16 md:w-20 md:h-20 bg-[#ef3131]/10 rounded-2xl flex items-center justify-center mx-auto mb-4 md:mb-6">
+          <Card className="border-0 shadow-2xl bg-white">
+            <CardHeader className="text-center bg-gradient-to-r from-[#ef3131] to-red-500 text-white">
+              <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <svg
-                  className="h-8 w-8 md:h-10 md:w-10 text-[#ef3131]"
+                  className="h-8 w-8 text-white"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -101,18 +100,18 @@ const RegisterStudentPage = () => {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
+                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
                   />
                 </svg>
               </div>
-              <CardTitle className="text-2xl md:text-3xl font-bold text-gray-900">
-                Register Student
+              <CardTitle className="text-2xl font-bold">
+                Register New Student
               </CardTitle>
-              <p className="text-gray-600 font-light mt-2">
-                Enter student information for admission
+              <p className="text-white/90 font-light">
+                Enter student information to register them in the system
               </p>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-8">
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <Label
@@ -129,6 +128,7 @@ const RegisterStudentPage = () => {
                     }
                     placeholder="Enter student's full name"
                     className="mt-2 h-11 md:h-12 text-base"
+                    validation={{ name: true }}
                     required
                   />
                 </div>
@@ -152,6 +152,7 @@ const RegisterStudentPage = () => {
                     placeholder="Enter National ID (e.g., 14 digits)"
                     className="mt-2 h-11 md:h-12 text-base"
                     maxLength={14}
+                    validation={{ nationalId: true }}
                     required
                   />
                   <p className="text-sm text-gray-500 mt-1">
@@ -159,95 +160,102 @@ const RegisterStudentPage = () => {
                   </p>
                 </div>
 
-                <div>
-                  <Label
-                    htmlFor="mathScore"
-                    className="text-base font-medium text-gray-700"
-                  >
-                    Math Score:
-                  </Label>
-                  <Input
-                    id="mathScore"
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={formData.mathScore}
-                    onChange={(e) =>
-                      handleInputChange("mathScore", e.target.value)
-                    }
-                    placeholder="Enter Math score (0-100)"
-                    className="mt-2 h-11 md:h-12 text-base"
-                    required
-                  />
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div>
+                    <Label
+                      htmlFor="mathScore"
+                      className="text-base font-medium text-gray-700"
+                    >
+                      Math Score:
+                    </Label>
+                    <Input
+                      id="mathScore"
+                      type="number"
+                      min="0"
+                      max="60"
+                      value={formData.mathScore}
+                      onChange={(e) =>
+                        handleInputChange("mathScore", e.target.value)
+                      }
+                      placeholder="Enter Math score (0-60)"
+                      className="mt-2 h-11 md:h-12 text-base"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label
+                      htmlFor="englishScore"
+                      className="text-base font-medium text-gray-700"
+                    >
+                      English Score:
+                    </Label>
+                    <Input
+                      id="englishScore"
+                      type="number"
+                      min="0"
+                      max="40"
+                      value={formData.englishScore}
+                      onChange={(e) =>
+                        handleInputChange("englishScore", e.target.value)
+                      }
+                      placeholder="Enter English score (0-40)"
+                      className="mt-2 h-11 md:h-12 text-base"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label
+                      htmlFor="thirdPrepScore"
+                      className="text-base font-medium text-gray-700"
+                    >
+                      Third Prep Score:
+                    </Label>
+                    <Input
+                      id="thirdPrepScore"
+                      type="number"
+                      min="0"
+                      max="280"
+                      value={formData.thirdPrepScore}
+                      onChange={(e) =>
+                        handleInputChange("thirdPrepScore", e.target.value)
+                      }
+                      placeholder="Enter Third Prep score (0-280)"
+                      className="mt-2 h-11 md:h-12 text-base"
+                      required
+                    />
+                  </div>
                 </div>
 
-                <div>
-                  <Label
-                    htmlFor="englishScore"
-                    className="text-base font-medium text-gray-700"
-                  >
-                    English Score:
-                  </Label>
-                  <select
-                    id="englishScore"
-                    value={formData.englishScore}
-                    onChange={(e) =>
-                      handleInputChange("englishScore", e.target.value)
-                    }
-                    className="mt-2 w-full h-11 md:h-12 px-3 border border-gray-300 rounded-md text-base focus:outline-none focus:ring-2 focus:ring-[#ef3131] focus:border-transparent"
-                    required
-                  >
-                    <option value="">Enter English score (0-100)</option>
-                    {Array.from({ length: 101 }, (_, i) => (
-                      <option key={i} value={i}>
-                        {i}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <Label
-                    htmlFor="thirdPrepScore"
-                    className="text-base font-medium text-gray-700"
-                  >
-                    Third Prep Score:
-                  </Label>
-                  <Input
-                    id="thirdPrepScore"
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={formData.thirdPrepScore}
-                    onChange={(e) =>
-                      handleInputChange("thirdPrepScore", e.target.value)
-                    }
-                    placeholder="Enter Third Prep score (0-100)"
-                    className="mt-2 h-11 md:h-12 text-base"
-                    required
-                  />
-                </div>
-
-                <div className="flex items-center space-x-3">
-                  <Checkbox
-                    id="acceptanceLetter"
-                    checked={formData.acceptanceLetter}
-                    onCheckedChange={(checked) =>
-                      handleInputChange("acceptanceLetter", checked)
-                    }
-                    className="w-5 h-5"
-                  />
-                  <Label
-                    htmlFor="acceptanceLetter"
-                    className="text-base font-medium text-gray-700 cursor-pointer"
-                  >
-                    Acceptance Letter Received
-                  </Label>
+                <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
+                  <div className="flex items-start space-x-3">
+                    <Checkbox
+                      id="acceptanceLetter"
+                      checked={formData.acceptanceLetter}
+                      onCheckedChange={(checked) =>
+                        handleInputChange("acceptanceLetter", checked)
+                      }
+                      className="mt-1"
+                    />
+                    <div className="flex-1">
+                      <Label
+                        htmlFor="acceptanceLetter"
+                        className="text-base font-medium text-gray-700 cursor-pointer block"
+                      >
+                        Acceptance Letter Received
+                      </Label>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Confirm that the student has received their acceptance
+                        letter
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
                 <Button
                   type="submit"
-                  className="w-full bg-[#ef3131] hover:bg-red-600 h-11 md:h-12 text-base md:text-lg font-semibold rounded-full"
+                  className="w-full bg-[#ef3131] hover:bg-red-600 h-12 text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-200"
                   disabled={isLoading}
                 >
                   {isLoading ? (
