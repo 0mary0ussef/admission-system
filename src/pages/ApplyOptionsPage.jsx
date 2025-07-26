@@ -48,212 +48,6 @@ const ApplyOptionsPage = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-            {/* In-Person Application */}
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow bg-white h-full flex flex-col">
-              <CardHeader className="text-center pb-4 md:pb-6 flex-shrink-0">
-                <div className="w-16 h-16 md:w-20 md:h-20 bg-[#ef3131]/10 rounded-2xl flex items-center justify-center mx-auto mb-4 md:mb-6">
-                  <svg
-                    className="h-8 w-8 md:h-10 md:w-10 text-[#ef3131]"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                    />
-                  </svg>
-                </div>
-                <CardTitle className="text-xl md:text-2xl font-bold text-gray-900">
-                  Visit Our School
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="text-center space-y-6 flex-grow flex flex-col">
-                <p className="text-gray-600 leading-relaxed font-light text-sm md:text-base flex-grow">
-                  Come to our campus for a complete enrollment experience. Our
-                  admission team will guide you through the entire process and
-                  answer all your questions in person.
-                </p>
-
-                <div className="space-y-3 md:space-y-4">
-                  <div className="flex items-center text-left">
-                    <svg
-                      className="h-4 w-4 md:h-5 md:w-5 text-[#ef3131] mr-3 flex-shrink-0"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-                      />
-                    </svg>
-                    <span className="text-gray-700 text-sm md:text-base">
-                      Meet with our admission counselors
-                    </span>
-                  </div>
-                  <div className="flex items-center text-left">
-                    <svg
-                      className="h-4 w-4 md:h-5 md:w-5 text-[#ef3131] mr-3 flex-shrink-0"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                      />
-                    </svg>
-                    <span className="text-gray-700 text-sm md:text-base">
-                      Complete all paperwork on-site
-                    </span>
-                  </div>
-                  <div className="flex items-center text-left">
-                    <svg
-                      className="h-4 w-4 md:h-5 md:w-5 text-[#ef3131] mr-3 flex-shrink-0"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                      />
-                    </svg>
-                    <span className="text-gray-700 text-sm md:text-base">
-                      Tour our facilities and labs
-                    </span>
-                  </div>
-                </div>
-
-                <div className="bg-gray-50 rounded-lg p-3 md:p-4 text-xs md:text-sm text-gray-600">
-                  <p className="font-medium mb-2">Office Hours:</p>
-                  <p>Sunday - Thursday: 8:00 AM - 4:00 PM</p>
-                  <p>Friday - Saturday: Closed</p>
-                </div>
-
-                <div className="mt-6">
-                  <Link to="/contact">
-                    <Button className="w-full bg-[#ef3131] hover:bg-red-600 text-sm md:text-lg py-2 md:py-3 rounded-full font-semibold">
-                      Get Directions & Contact Info
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Online Application */}
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow bg-white h-full flex flex-col">
-              <CardHeader className="text-center pb-4 md:pb-6 flex-shrink-0">
-                <div className="w-16 h-16 md:w-20 md:h-20 bg-[#ef3131]/10 rounded-2xl flex items-center justify-center mx-auto mb-4 md:mb-6">
-                  <svg
-                    className="h-8 w-8 md:h-10 md:w-10 text-[#ef3131]"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                    />
-                  </svg>
-                </div>
-                <CardTitle className="text-xl md:text-2xl font-bold text-gray-900">
-                  Apply Online
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="text-center space-y-6 flex-grow flex flex-col">
-                <p className="text-gray-600 leading-relaxed font-light text-sm md:text-base flex-grow">
-                  Start your application process online if you're already
-                  registered with us. Verify your information and proceed
-                  directly to the entrance examination.
-                </p>
-
-                <div className="space-y-3 md:space-y-4">
-                  <div className="flex items-center text-left">
-                    <svg
-                      className="h-4 w-4 md:h-5 md:w-5 text-[#ef3131] mr-3 flex-shrink-0"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                      />
-                    </svg>
-                    <span className="text-gray-700 text-sm md:text-base">
-                      Verify with your National ID
-                    </span>
-                  </div>
-                  <div className="flex items-center text-left">
-                    <svg
-                      className="h-4 w-4 md:h-5 md:w-5 text-[#ef3131] mr-3 flex-shrink-0"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                      />
-                    </svg>
-                    <span className="text-gray-700 text-sm md:text-base">
-                      Take the entrance exam online
-                    </span>
-                  </div>
-                  <div className="flex items-center text-left">
-                    <svg
-                      className="h-4 w-4 md:h-5 md:w-5 text-[#ef3131] mr-3 flex-shrink-0"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-                      />
-                    </svg>
-                    <span className="text-gray-700 text-sm md:text-base">
-                      Schedule your interview
-                    </span>
-                  </div>
-                </div>
-
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 md:p-4 text-xs md:text-sm text-blue-800">
-                  <p className="font-medium mb-1">Note:</p>
-                  <p>
-                    This option is only available for students who have already
-                    enrolled their basic information at our school.
-                  </p>
-                </div>
-
-                <div className="mt-6">
-                  <Link to="/verify-student">
-                    <Button className="w-full bg-[#ef3131] hover:bg-red-600 text-sm md:text-lg py-2 md:py-3 rounded-full font-semibold">
-                      Verify & Start Application
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-
             {/* Teacher Application */}
             <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow bg-white h-full flex flex-col">
               <CardHeader className="text-center pb-4 md:pb-6 flex-shrink-0">
@@ -363,6 +157,212 @@ const ApplyOptionsPage = () => {
                   <Link to="/teacher/login">
                     <Button className="w-full bg-[#ef3131] hover:bg-red-600 text-sm md:text-lg py-2 md:py-3 rounded-full font-semibold">
                       Teacher Login
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Complete Student Info */}
+            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow bg-white h-full flex flex-col">
+              <CardHeader className="text-center pb-4 md:pb-6 flex-shrink-0">
+                <div className="w-16 h-16 md:w-20 md:h-20 bg-[#ef3131]/10 rounded-2xl flex items-center justify-center mx-auto mb-4 md:mb-6">
+                  <svg
+                    className="h-8 w-8 md:h-10 md:w-10 text-[#ef3131]"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
+                  </svg>
+                </div>
+                <CardTitle className="text-xl md:text-2xl font-bold text-gray-900">
+                  Complete Your Info
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-center space-y-6 flex-grow flex flex-col">
+                <p className="text-gray-600 leading-relaxed font-light text-sm md:text-base flex-grow">
+                  Check if your National ID exists in our system and complete
+                  your information to proceed with the admission process.
+                </p>
+
+                <div className="space-y-3 md:space-y-4">
+                  <div className="flex items-center text-left">
+                    <svg
+                      className="h-4 w-4 md:h-5 md:w-5 text-[#ef3131] mr-3 flex-shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
+                    </svg>
+                    <span className="text-gray-700 text-sm md:text-base">
+                      Verify your National ID
+                    </span>
+                  </div>
+                  <div className="flex items-center text-left">
+                    <svg
+                      className="h-4 w-4 md:h-5 md:w-5 text-[#ef3131] mr-3 flex-shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                      />
+                    </svg>
+                    <span className="text-gray-700 text-sm md:text-base">
+                      Complete your personal information
+                    </span>
+                  </div>
+                  <div className="flex items-center text-left">
+                    <svg
+                      className="h-4 w-4 md:h-5 md:w-5 text-[#ef3131] mr-3 flex-shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
+                    </svg>
+                    <span className="text-gray-700 text-sm md:text-base">
+                      Proceed to entrance examination
+                    </span>
+                  </div>
+                </div>
+
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 md:p-4 text-xs md:text-sm text-blue-800">
+                  <p className="font-medium mb-1">Required Information:</p>
+                  <p>
+                    Date of Birth, Parent's Occupation, Address, Contact Details
+                  </p>
+                </div>
+
+                <div className="mt-6">
+                  <Link to="/check-national-id">
+                    <Button className="w-full bg-[#ef3131] hover:bg-red-600 text-sm md:text-lg py-2 md:py-3 rounded-full font-semibold">
+                      Check & Complete Info
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Start Your Exam */}
+            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow bg-white h-full flex flex-col">
+              <CardHeader className="text-center pb-4 md:pb-6 flex-shrink-0">
+                <div className="w-16 h-16 md:w-20 md:h-20 bg-[#ef3131]/10 rounded-2xl flex items-center justify-center mx-auto mb-4 md:mb-6">
+                  <svg
+                    className="h-8 w-8 md:h-10 md:w-10 text-[#ef3131]"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                </div>
+                <CardTitle className="text-xl md:text-2xl font-bold text-gray-900">
+                  Start Your Exam
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-center space-y-6 flex-grow flex flex-col">
+                <p className="text-gray-600 leading-relaxed font-light text-sm md:text-base flex-grow">
+                  If you have already completed your information and are ready
+                  to take the entrance examination, you can start the exam
+                  directly.
+                </p>
+
+                <div className="space-y-3 md:space-y-4">
+                  <div className="flex items-center text-left">
+                    <svg
+                      className="h-4 w-4 md:h-5 md:w-5 text-[#ef3131] mr-3 flex-shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
+                    </svg>
+                    <span className="text-gray-700 text-sm md:text-base">
+                      Verify your completed information
+                    </span>
+                  </div>
+                  <div className="flex items-center text-left">
+                    <svg
+                      className="h-4 w-4 md:h-5 md:w-5 text-[#ef3131] mr-3 flex-shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                      />
+                    </svg>
+                    <span className="text-gray-700 text-sm md:text-base">
+                      Take the entrance exam online
+                    </span>
+                  </div>
+                  <div className="flex items-center text-left">
+                    <svg
+                      className="h-4 w-4 md:h-5 md:w-5 text-[#ef3131] mr-3 flex-shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                      />
+                    </svg>
+                    <span className="text-gray-700 text-sm md:text-base">
+                      Get your results immediately
+                    </span>
+                  </div>
+                </div>
+
+                <div className="bg-green-50 border border-green-200 rounded-lg p-3 md:p-4 text-xs md:text-sm text-green-800">
+                  <p className="font-medium mb-1">Ready to Start:</p>
+                  <p>
+                    This option is for students who have already completed their
+                    information and are ready for the entrance examination.
+                  </p>
+                </div>
+
+                <div className="mt-6">
+                  <Link to="/verify-student">
+                    <Button className="w-full bg-[#ef3131] hover:bg-red-600 text-sm md:text-lg py-2 md:py-3 rounded-full font-semibold">
+                      Start Your Exam
                     </Button>
                   </Link>
                 </div>

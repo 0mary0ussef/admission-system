@@ -54,6 +54,20 @@ const ExamPage = () => {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [isCompleted]);
 
+  // Prevent scrolling when modal is open
+  useEffect(() => {
+    if (showExitWarning) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [showExitWarning]);
+
   if (isCompleted) {
     const score = calculateScore();
     return (
@@ -209,9 +223,25 @@ const ExamPage = () => {
               </div>
             </CardHeader>
             <CardContent className="p-8">
-              <div className="space-y-8">
-                <div className="bg-gray-50 p-6 rounded-lg border-l-4 border-[#ef3131]">
-                  <h3 className="text-xl font-semibold text-gray-900 leading-relaxed">
+              <div
+                className={`space-y-8 ${
+                  examSections[currentSection].name === "Arabic" ? "rtl" : "ltr"
+                }`}
+              >
+                <div
+                  className={`bg-gray-50 p-6 rounded-lg border-l-4 border-[#ef3131] ${
+                    examSections[currentSection].name === "Arabic"
+                      ? "border-l-0 border-r-4"
+                      : ""
+                  }`}
+                >
+                  <h3
+                    className={`text-xl font-semibold text-gray-900 leading-relaxed ${
+                      examSections[currentSection].name === "Arabic"
+                        ? "text-right"
+                        : "text-left"
+                    }`}
+                  >
                     {currentQuestionData.question}
                   </h3>
                 </div>
@@ -226,7 +256,11 @@ const ExamPage = () => {
                   {currentQuestionData.options.map((option, index) => (
                     <div
                       key={index}
-                      className={`flex items-start space-x-3 p-4 border rounded-lg transition-all duration-200 cursor-pointer group ${
+                      className={`flex items-start p-4 border rounded-lg transition-all duration-200 cursor-pointer group ${
+                        examSections[currentSection].name === "Arabic"
+                          ? "flex-row-reverse space-x-reverse space-x-3"
+                          : "space-x-3"
+                      } ${
                         answers[currentQuestionKey] === index
                           ? "border-[#ef3131] bg-red-50 shadow-md"
                           : "border-gray-200 hover:border-[#ef3131] hover:bg-red-50"
@@ -241,6 +275,10 @@ const ExamPage = () => {
                       <Label
                         htmlFor={`option-${index}`}
                         className={`cursor-pointer flex-1 text-lg leading-relaxed transition-colors duration-200 ${
+                          examSections[currentSection].name === "Arabic"
+                            ? "text-right"
+                            : "text-left"
+                        } ${
                           answers[currentQuestionKey] === index
                             ? "text-[#ef3131] font-medium"
                             : "group-hover:text-[#ef3131]"
@@ -308,7 +346,7 @@ const ExamPage = () => {
 
       {/* Exit Warning Modal */}
       {showExitWarning && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 backdrop-blur-sm bg-opacity-10 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-2xl">
             <div className="flex items-center mb-4">
               <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">

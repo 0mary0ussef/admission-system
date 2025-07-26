@@ -87,7 +87,6 @@ const Textarea = ({
         disabled={disabled}
         required={required}
         rows={rows}
-        style={{ resize: "vertical" }}
         {...props}
       />
       {error && (showValidation || isTouched) && (

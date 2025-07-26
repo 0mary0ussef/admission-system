@@ -3,6 +3,8 @@ import { AuthProvider } from "./context/AuthContext";
 import HomePage from "./pages/HomePage";
 import ApplyOptionsPage from "./pages/ApplyOptionsPage";
 import VerifyStudentPage from "./pages/VerifyStudentPage";
+import CheckNationalIdPage from "./pages/CheckNationalIdPage";
+import CompleteStudentInfoPage from "./pages/CompleteStudentInfoPage";
 import ExamPage from "./pages/ExamPage";
 import ContactPage from "./pages/ContactPage";
 import AdminLoginPage from "./pages/AdminLoginPage";
@@ -22,6 +24,14 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/apply-options" element={<ApplyOptionsPage />} />
             <Route path="/verify-student" element={<VerifyStudentPage />} />
+            <Route
+              path="/check-national-id"
+              element={<CheckNationalIdPage />}
+            />
+            <Route
+              path="/complete-student-info"
+              element={<CompleteStudentInfoPage />}
+            />
             <Route path="/exam" element={<ExamPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/apply" element={<ApplyPage />} />

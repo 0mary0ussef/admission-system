@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
@@ -35,7 +35,29 @@ const AdminDashboardPage = () => {
     saveScores,
     updateStudentStatus,
     stats,
+    sortBy,
+    sortOrder,
+    handleSort,
+    statusFilter,
+    setStatusFilter,
   } = useStudents();
+
+  const [showStatusConfirmation, setShowStatusConfirmation] = useState(false);
+  const [pendingStatusChange, setPendingStatusChange] = useState(null);
+
+  // Prevent scrolling when modal is open
+  useEffect(() => {
+    if (showStatusConfirmation) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [showStatusConfirmation]);
 
   useEffect(() => {
     // Check if admin is authenticated
@@ -225,6 +247,114 @@ const AdminDashboardPage = () => {
           </CardContent>
         </Card>
 
+        {/* Sort Buttons and Filters */}
+        <Card className="mb-6 border border-gray-200 shadow-none bg-white rounded-xl">
+          <CardContent className="p-6">
+            <div className="flex flex-wrap gap-2 items-center">
+              <Button
+                variant={sortBy === "prepScore" ? "default" : "outline"}
+                onClick={() => handleSort("prepScore")}
+                className={`flex items-center space-x-2 ${
+                  sortBy === "prepScore"
+                    ? "bg-[#ef3131] hover:bg-red-600"
+                    : "border-gray-300 hover:border-[#ef3131] hover:text-[#ef3131]"
+                }`}
+              >
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"
+                  />
+                </svg>
+                <span>
+                  Prep Score{" "}
+                  {sortBy === "prepScore" && (sortOrder === "desc" ? "↓" : "↑")}
+                </span>
+              </Button>
+
+              <Button
+                variant={sortBy === "totalScore" ? "default" : "outline"}
+                onClick={() => handleSort("totalScore")}
+                className={`flex items-center space-x-2 ${
+                  sortBy === "totalScore"
+                    ? "bg-[#ef3131] hover:bg-red-600"
+                    : "border-gray-300 hover:border-[#ef3131] hover:text-[#ef3131]"
+                }`}
+              >
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"
+                  />
+                </svg>
+                <span>
+                  Interview Total{" "}
+                  {sortBy === "totalScore" &&
+                    (sortOrder === "desc" ? "↓" : "↑")}
+                </span>
+              </Button>
+
+              <Button
+                variant={sortBy === "name" ? "default" : "outline"}
+                onClick={() => handleSort("name")}
+                className={`flex items-center space-x-2 ${
+                  sortBy === "name"
+                    ? "bg-[#ef3131] hover:bg-red-600"
+                    : "border-gray-300 hover:border-[#ef3131] hover:text-[#ef3131]"
+                }`}
+              >
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"
+                  />
+                </svg>
+                <span>
+                  Name {sortBy === "name" && (sortOrder === "desc" ? "↓" : "↑")}
+                </span>
+              </Button>
+
+              <div className="flex items-center space-x-2 ml-auto">
+                <label className="text-sm font-medium text-gray-700">
+                  Filter by Status:
+                </label>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#ef3131] focus:border-transparent"
+                >
+                  <option value="all">All Students</option>
+                  <option value="Accepted">Accepted</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Rejected">Rejected</option>
+                  <option value="Waitlisted">Waitlisted</option>
+                </select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Students Table */}
         <Card className="border border-gray-200 shadow-none bg-white rounded-xl">
           <CardHeader className="pb-0">
@@ -408,9 +538,15 @@ const AdminDashboardPage = () => {
                       <TableCell>
                         <select
                           value={student.status}
-                          onChange={(e) =>
-                            updateStudentStatus(student.id, e.target.value)
-                          }
+                          onChange={(e) => {
+                            setPendingStatusChange({
+                              studentId: student.id,
+                              newStatus: e.target.value,
+                              studentName: student.name,
+                              oldStatus: student.status,
+                            });
+                            setShowStatusConfirmation(true);
+                          }}
                           className="text-sm border rounded p-1"
                         >
                           <option value="Pending">Pending</option>
@@ -438,6 +574,90 @@ const AdminDashboardPage = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Status Change Confirmation Modal */}
+      {showStatusConfirmation && pendingStatusChange && (
+        <div className="fixed inset-0 backdrop-blur-sm bg-opacity-10 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-2xl">
+            <div className="flex items-center mb-4">
+              <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mr-4">
+                <svg
+                  className="w-6 h-6 text-yellow-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900">
+                Confirm Status Change
+              </h3>
+            </div>
+            <div className="mb-6">
+              <p className="text-gray-600 mb-4">
+                Are you sure you want to change the status of{" "}
+                <span className="font-semibold text-gray-900">
+                  {pendingStatusChange.studentName}
+                </span>{" "}
+                from{" "}
+                <span className="font-semibold text-gray-900">
+                  {pendingStatusChange.oldStatus}
+                </span>{" "}
+                to{" "}
+                <span className="font-semibold text-[#ef3131]">
+                  {pendingStatusChange.newStatus}
+                </span>
+                ?
+              </p>
+              <div className="bg-gray-50 rounded-lg p-3 text-sm">
+                <p className="font-medium text-gray-700 mb-1">
+                  Status Change Details:
+                </p>
+                <p className="text-gray-600">
+                  Student: {pendingStatusChange.studentName}
+                </p>
+                <p className="text-gray-600">
+                  Current Status: {pendingStatusChange.oldStatus}
+                </p>
+                <p className="text-gray-600">
+                  New Status: {pendingStatusChange.newStatus}
+                </p>
+              </div>
+            </div>
+            <div className="flex space-x-3">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowStatusConfirmation(false);
+                  setPendingStatusChange(null);
+                }}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  updateStudentStatus(
+                    pendingStatusChange.studentId,
+                    pendingStatusChange.newStatus
+                  );
+                  setShowStatusConfirmation(false);
+                  setPendingStatusChange(null);
+                }}
+                className="flex-1 bg-[#ef3131] hover:bg-red-600"
+              >
+                Confirm Change
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

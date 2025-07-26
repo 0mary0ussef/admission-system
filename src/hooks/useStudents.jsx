@@ -72,13 +72,47 @@ export const useStudents = () => {
     englishInterviewScore: 0,
     arabicInterviewScore: 0,
   });
+  const [sortBy, setSortBy] = useState("name");
+  const [sortOrder, setSortOrder] = useState("asc");
+  const [statusFilter, setStatusFilter] = useState("all");
 
-  const filteredStudents = students.filter(
-    (student) =>
-      student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.nationalId.includes(searchTerm) ||
-      student.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredStudents = students
+    .filter(
+      (student) =>
+        (student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          student.nationalId.includes(searchTerm) ||
+          student.email.toLowerCase().includes(searchTerm.toLowerCase())) &&
+        (statusFilter === "all" || student.status === statusFilter)
+    )
+    .sort((a, b) => {
+      let aValue, bValue;
+
+      switch (sortBy) {
+        case "prepScore":
+          aValue = a.thirdPrepScore;
+          bValue = b.thirdPrepScore;
+          break;
+        case "totalScore":
+          aValue = a.totalScore;
+          bValue = b.totalScore;
+          break;
+        case "status":
+          aValue = a.status;
+          bValue = b.status;
+          break;
+        case "name":
+        default:
+          aValue = a.name;
+          bValue = b.name;
+          break;
+      }
+
+      if (sortOrder === "desc") {
+        return bValue > aValue ? 1 : bValue < aValue ? -1 : 0;
+      } else {
+        return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
+      }
+    });
 
   const handleEditScores = (studentId) => {
     const student = students.find((s) => s.id === studentId);
@@ -135,6 +169,15 @@ export const useStudents = () => {
         students.filter((s) => s.totalScore > 0).length || 0,
   };
 
+  const handleSort = (newSortBy) => {
+    if (sortBy === newSortBy) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(newSortBy);
+      setSortOrder("desc"); // Default to descending for scores
+    }
+  };
+
   return {
     students,
     setStudents,
@@ -149,5 +192,10 @@ export const useStudents = () => {
     saveScores,
     updateStudentStatus,
     stats,
+    sortBy,
+    sortOrder,
+    handleSort,
+    statusFilter,
+    setStatusFilter,
   };
 };
