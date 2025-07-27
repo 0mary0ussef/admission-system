@@ -19,6 +19,7 @@ const mockStudents = [
     mathInterviewScore: 0,
     englishInterviewScore: 0,
     arabicInterviewScore: 0,
+    interviewScore: 0,
     totalScore: 0,
     status: "Pending",
   },
@@ -38,6 +39,7 @@ const mockStudents = [
     mathInterviewScore: 80,
     englishInterviewScore: 88,
     arabicInterviewScore: 82,
+    interviewScore: 35,
     totalScore: 335,
     status: "Pending",
   },
@@ -57,6 +59,7 @@ const mockStudents = [
     mathInterviewScore: 0,
     englishInterviewScore: 0,
     arabicInterviewScore: 0,
+    interviewScore: 0,
     totalScore: 0,
     status: "Pending",
   },
@@ -72,9 +75,28 @@ export const useStudents = () => {
     englishInterviewScore: 0,
     arabicInterviewScore: 0,
   });
+  const [interviewScore, setInterviewScore] = useState(0);
+  const [editingInterviewScore, setEditingInterviewScore] = useState(null);
   const [sortBy, setSortBy] = useState("name");
   const [sortOrder, setSortOrder] = useState("asc");
   const [statusFilter, setStatusFilter] = useState("all");
+
+  // Calculate percentage for a student
+  const calculatePercentage = (student) => {
+    const examTotal =
+      student.softwareInterviewScore +
+      student.mathInterviewScore +
+      student.englishInterviewScore +
+      student.arabicInterviewScore;
+    const interviewTotal = student.interviewScore || 0;
+
+    // Exam scores are 60% of total (15 each for 4 subjects)
+    const examPercentage = (examTotal / 60) * 60;
+    // Interview score is 40% of total
+    const interviewPercentage = (interviewTotal / 40) * 40;
+
+    return Math.round(examPercentage + interviewPercentage);
+  };
 
   const filteredStudents = students
     .filter(
@@ -92,9 +114,9 @@ export const useStudents = () => {
           aValue = a.thirdPrepScore;
           bValue = b.thirdPrepScore;
           break;
-        case "totalScore":
-          aValue = a.totalScore;
-          bValue = b.totalScore;
+        case "percentage":
+          aValue = calculatePercentage(a);
+          bValue = calculatePercentage(b);
           break;
         case "status":
           aValue = a.status;
@@ -178,18 +200,49 @@ export const useStudents = () => {
     }
   };
 
+  const handleEditInterviewScore = (studentId) => {
+    const student = students.find((s) => s.id === studentId);
+    if (student) {
+      setEditingInterviewScore(studentId);
+      setInterviewScore(student.interviewScore || 0);
+    }
+  };
+
+  const saveInterviewScore = () => {
+    if (editingInterviewScore) {
+      setStudents((prev) =>
+        prev.map((student) => {
+          if (student.id === editingInterviewScore) {
+            return {
+              ...student,
+              interviewScore: interviewScore,
+            };
+          }
+          return student;
+        })
+      );
+      setEditingInterviewScore(null);
+      setInterviewScore(0);
+    }
+  };
+
   return {
-    students,
-    setStudents,
     searchTerm,
     setSearchTerm,
     editingStudent,
     setEditingStudent,
     editScores,
     setEditScores,
+    interviewScore,
+    setInterviewScore,
+    editingInterviewScore,
+    setEditingInterviewScore,
     filteredStudents,
     handleEditScores,
     saveScores,
+    handleEditInterviewScore,
+    saveInterviewScore,
+    calculatePercentage,
     updateStudentStatus,
     stats,
     sortBy,

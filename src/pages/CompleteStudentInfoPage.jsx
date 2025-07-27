@@ -41,9 +41,20 @@ const CompleteStudentInfoPage = () => {
   }, [navigate]);
 
   const handleInputChange = (field, value) => {
+    let processedValue = value;
+
+    // Format phone number as user types
+    if (field === "phoneNumber") {
+      // Remove all non-digits
+      const digits = value.replace(/\D/g, "");
+      // Limit to 11 digits
+      const limitedDigits = digits.slice(0, 11);
+      processedValue = limitedDigits;
+    }
+
     setFormData((prev) => ({
       ...prev,
-      [field]: value,
+      [field]: processedValue,
     }));
   };
 
@@ -61,24 +72,38 @@ const CompleteStudentInfoPage = () => {
     if (!formData.phoneNumber) errors.push("Phone Number is required");
     if (!formData.email) errors.push("Email Address is required");
 
-    // Validate date format
-    const dateRegex = /^(0[1-9]|1[0-2])\/(0[1-9]|[12]\d|3[01])\/\d{4}$/;
-    if (formData.dateOfBirth && !dateRegex.test(formData.dateOfBirth)) {
-      errors.push("Date of Birth must be in mm/dd/yyyy format");
+    // Validate date format (HTML date input returns yyyy-mm-dd)
+    if (formData.dateOfBirth) {
+      const date = new Date(formData.dateOfBirth);
+      const today = new Date();
+      const minDate = new Date("1990-01-01");
+      const maxDate = new Date("2010-12-31");
+
+      if (isNaN(date.getTime())) {
+        errors.push("Please enter a valid Date of Birth");
+      } else if (date < minDate || date > maxDate) {
+        errors.push("Date of Birth must be between 1990 and 2010");
+      }
     }
 
-    // Validate phone number (Egyptian format)
-    const phoneRegex = /^01[0-2,5]\d{8}$/;
-    if (formData.phoneNumber && !phoneRegex.test(formData.phoneNumber)) {
-      errors.push(
-        "Phone Number must be a valid Egyptian number (e.g., 01012345678)"
-      );
+    // Validate phone number (Egyptian format - exactly 11 digits)
+    if (formData.phoneNumber) {
+      const cleanPhone = formData.phoneNumber.replace(/\D/g, "");
+      if (cleanPhone.length !== 11) {
+        errors.push("Phone Number must be exactly 11 digits");
+      } else if (!/^01\d{9}$/.test(cleanPhone)) {
+        errors.push(
+          "Phone Number must be a valid Egyptian number (e.g., 01012345678)"
+        );
+      }
     }
 
     // Validate email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (formData.email && !emailRegex.test(formData.email)) {
-      errors.push("Please enter a valid email address");
+    if (formData.email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        errors.push("Please enter a valid email address");
+      }
     }
 
     return errors;
@@ -104,11 +129,17 @@ const CompleteStudentInfoPage = () => {
     localStorage.setItem("studentInfo", JSON.stringify(formData));
     localStorage.setItem("studentToken", "completed");
 
-    setSuccess("Information completed successfully! Redirecting to exam...");
+    setSuccess("Information completed successfully! Redirecting to home...");
 
-    // Redirect to exam after a short delay
+    // Scroll to top of the page
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+
+    // Redirect to home page after a short delay
     setTimeout(() => {
-      navigate("/exam");
+      navigate("/");
     }, 2000);
 
     setIsLoading(false);
@@ -323,12 +354,15 @@ const CompleteStudentInfoPage = () => {
                     </Label>
                     <Input
                       id="phoneNumber"
+                      type="tel"
                       value={formData.phoneNumber}
                       onChange={(e) =>
                         handleInputChange("phoneNumber", e.target.value)
                       }
                       placeholder="01012345678"
                       className="mt-2 h-12 text-lg"
+                      validation={{ phone: true }}
+                      maxLength={11}
                     />
                   </div>
 
@@ -345,6 +379,7 @@ const CompleteStudentInfoPage = () => {
                       }
                       placeholder="example@example.com"
                       className="mt-2 h-12 text-lg"
+                      validation={{ email: true }}
                     />
                   </div>
                 </div>

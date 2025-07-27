@@ -24,15 +24,21 @@ import { useStudents } from "../hooks/useStudents";
 const AdminDashboardPage = () => {
   const navigate = useNavigate();
   const {
-    students,
     searchTerm,
     setSearchTerm,
     editingStudent,
     editScores,
     setEditScores,
+    interviewScore,
+    setInterviewScore,
+    editingInterviewScore,
+    setEditingInterviewScore,
     filteredStudents,
     handleEditScores,
     saveScores,
+    handleEditInterviewScore,
+    saveInterviewScore,
+    calculatePercentage,
     updateStudentStatus,
     stats,
     sortBy,
@@ -44,10 +50,13 @@ const AdminDashboardPage = () => {
 
   const [showStatusConfirmation, setShowStatusConfirmation] = useState(false);
   const [pendingStatusChange, setPendingStatusChange] = useState(null);
+  const [showInterviewConfirmation, setShowInterviewConfirmation] =
+    useState(false);
+  const [pendingInterviewChange, setPendingInterviewChange] = useState(null);
 
   // Prevent scrolling when modal is open
   useEffect(() => {
-    if (showStatusConfirmation) {
+    if (showStatusConfirmation || showInterviewConfirmation) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "unset";
@@ -57,7 +66,7 @@ const AdminDashboardPage = () => {
     return () => {
       document.body.style.overflow = "unset";
     };
-  }, [showStatusConfirmation]);
+  }, [showStatusConfirmation, showInterviewConfirmation]);
 
   useEffect(() => {
     // Check if admin is authenticated
@@ -280,10 +289,10 @@ const AdminDashboardPage = () => {
               </Button>
 
               <Button
-                variant={sortBy === "totalScore" ? "default" : "outline"}
-                onClick={() => handleSort("totalScore")}
+                variant={sortBy === "percentage" ? "default" : "outline"}
+                onClick={() => handleSort("percentage")}
                 className={`flex items-center space-x-2 ${
-                  sortBy === "totalScore"
+                  sortBy === "percentage"
                     ? "bg-[#ef3131] hover:bg-red-600"
                     : "border-gray-300 hover:border-[#ef3131] hover:text-[#ef3131]"
                 }`}
@@ -302,8 +311,8 @@ const AdminDashboardPage = () => {
                   />
                 </svg>
                 <span>
-                  Interview Total{" "}
-                  {sortBy === "totalScore" &&
+                  Percentage{" "}
+                  {sortBy === "percentage" &&
                     (sortOrder === "desc" ? "↓" : "↑")}
                 </span>
               </Button>
@@ -367,13 +376,14 @@ const AdminDashboardPage = () => {
                   <TableRow>
                     <TableHead>Name</TableHead>
                     <TableHead>National ID</TableHead>
-                    <TableHead>Scores</TableHead>
+                    <TableHead>Prep Scores</TableHead>
                     <TableHead>Acceptance</TableHead>
                     <TableHead>Contact</TableHead>
-                    <TableHead>Interview Scores</TableHead>
+                    <TableHead>Exam Scores</TableHead>
                     <TableHead>Total</TableHead>
+                    <TableHead>Interview Score</TableHead>
+                    <TableHead>Percentage</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -536,6 +546,81 @@ const AdminDashboardPage = () => {
                         </div>
                       </TableCell>
                       <TableCell>
+                        {editingInterviewScore === student.id ? (
+                          <div className="space-y-2 min-w-[120px]">
+                            <div className="flex items-center">
+                              <Input
+                                type="number"
+                                placeholder="Score"
+                                value={interviewScore}
+                                onChange={(e) =>
+                                  setInterviewScore(
+                                    Number.parseInt(e.target.value) || 0
+                                  )
+                                }
+                                className="h-8"
+                                max="40"
+                              />
+                            </div>
+                            <div className="flex space-x-1">
+                              <Button
+                                size="sm"
+                                onClick={() => {
+                                  setPendingInterviewChange({
+                                    studentId: student.id,
+                                    newScore: interviewScore,
+                                    studentName: student.name,
+                                    oldScore: student.interviewScore || 0,
+                                  });
+                                  setShowInterviewConfirmation(true);
+                                }}
+                                className="bg-[#ef3131] hover:bg-red-600"
+                              >
+                                Save
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setEditingInterviewScore(null)}
+                              >
+                                Cancel
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-center space-x-2">
+                            <div className="text-sm font-medium">
+                              {student.interviewScore || 0}/40
+                            </div>
+                            <button
+                              onClick={() =>
+                                handleEditInterviewScore(student.id)
+                              }
+                              className="text-gray-400 hover:text-gray-600"
+                            >
+                              <svg
+                                className="h-4 w-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                />
+                              </svg>
+                            </button>
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="font-bold text-blue-600">
+                          {calculatePercentage(student)}%
+                        </div>
+                      </TableCell>
+                      <TableCell>
                         <select
                           value={student.status}
                           onChange={(e) => {
@@ -547,24 +632,13 @@ const AdminDashboardPage = () => {
                             });
                             setShowStatusConfirmation(true);
                           }}
-                          className="text-sm border rounded p-1"
+                          className="text-sm border rounded p-1 cursor-pointer"
                         >
                           <option value="Pending">Pending</option>
                           <option value="Accepted">Accepted</option>
                           <option value="Rejected">Rejected</option>
                           <option value="Waitlisted">Waitlisted</option>
                         </select>
-                      </TableCell>
-                      <TableCell>
-                        {editingStudent !== student.id && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleEditScores(student.id)}
-                          >
-                            Edit Scores
-                          </Button>
-                        )}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -653,6 +727,84 @@ const AdminDashboardPage = () => {
                 className="flex-1 bg-[#ef3131] hover:bg-red-600"
               >
                 Confirm Change
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Interview Score Confirmation Modal */}
+      {showInterviewConfirmation && pendingInterviewChange && (
+        <div className="fixed inset-0 backdrop-blur-sm bg-opacity-10 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-2xl">
+            <div className="flex items-center mb-4">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                <svg
+                  className="w-6 h-6 text-blue-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900">
+                Confirm Interview Score
+              </h3>
+            </div>
+            <div className="mb-6">
+              <p className="text-gray-600 mb-4">
+                Are you sure you want to set the interview score for{" "}
+                <span className="font-semibold text-gray-900">
+                  {pendingInterviewChange.studentName}
+                </span>{" "}
+                to{" "}
+                <span className="font-semibold text-blue-600">
+                  {pendingInterviewChange.newScore}/40
+                </span>
+                ?
+              </p>
+              <div className="bg-gray-50 rounded-lg p-3 text-sm">
+                <p className="font-medium text-gray-700 mb-1">
+                  Interview Score Details:
+                </p>
+                <p className="text-gray-600">
+                  Student: {pendingInterviewChange.studentName}
+                </p>
+                <p className="text-gray-600">
+                  Current Score: {pendingInterviewChange.oldScore}/40
+                </p>
+                <p className="text-gray-600">
+                  New Score: {pendingInterviewChange.newScore}/40
+                </p>
+              </div>
+            </div>
+            <div className="flex space-x-3">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowInterviewConfirmation(false);
+                  setPendingInterviewChange(null);
+                  setEditingInterviewScore(null);
+                }}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  saveInterviewScore();
+                  setShowInterviewConfirmation(false);
+                  setPendingInterviewChange(null);
+                }}
+                className="flex-1 bg-[#ef3131] hover:bg-red-600"
+              >
+                Confirm Score
               </Button>
             </div>
           </div>

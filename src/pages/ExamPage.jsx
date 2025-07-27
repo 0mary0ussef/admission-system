@@ -100,28 +100,8 @@ const ExamPage = () => {
 
                   <div>
                     <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                      Your Results
+                      Thank you for taking the exam!
                     </h3>
-                    <div className="grid grid-cols-3 gap-4 mt-6">
-                      <div className="bg-blue-50 p-4 rounded-lg">
-                        <div className="text-3xl font-bold text-blue-600">
-                          {score.correct}
-                        </div>
-                        <div className="text-sm text-blue-600">Correct</div>
-                      </div>
-                      <div className="bg-red-50 p-4 rounded-lg">
-                        <div className="text-3xl font-bold text-red-600">
-                          {score.total - score.correct}
-                        </div>
-                        <div className="text-sm text-red-600">Incorrect</div>
-                      </div>
-                      <div className="bg-green-50 p-4 rounded-lg">
-                        <div className="text-3xl font-bold text-green-600">
-                          {score.percentage}%
-                        </div>
-                        <div className="text-sm text-green-600">Score</div>
-                      </div>
-                    </div>
                   </div>
 
                   <div className="space-y-4">
