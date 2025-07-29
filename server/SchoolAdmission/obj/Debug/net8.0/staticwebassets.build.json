@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "W8LbONNIkZn4MUEtCf6FdaQLCmJj2m8+81NQZQERIj8=",
+  "Hash": "/zArUUgzCVX25B4xT0yoMVfA0Buk3yDmXLoYAj0NEIc=",
   "Source": "SchoolAdmission",
   "BasePath": "_content/SchoolAdmission",
   "Mode": "Default",
@@ -10,10 +10,87 @@
     {
       "Name": "SchoolAdmission\\wwwroot",
       "Source": "SchoolAdmission",
-      "ContentRoot": "G:\\Cursor\\Projects\\AdmissionBackTeam\\server\\SchoolAdmission\\wwwroot\\",
+      "ContentRoot": "G:\\Cursor\\Projects\\admissionAllTeam\\server\\SchoolAdmission\\wwwroot\\",
       "BasePath": "_content/SchoolAdmission",
       "Pattern": "**"
     }
   ],
-  "Assets": []
+  "Assets": [
+    {
+      "Identity": "G:\\Cursor\\Projects\\admissionAllTeam\\server\\SchoolAdmission\\wwwroot\\uploads\\documents\\11111111111111_birthcertificate_20250729065459.jpg",
+      "SourceId": "SchoolAdmission",
+      "SourceType": "Discovered",
+      "ContentRoot": "G:\\Cursor\\Projects\\admissionAllTeam\\server\\SchoolAdmission\\wwwroot\\",
+      "BasePath": "_content/SchoolAdmission",
+      "RelativePath": "uploads/documents/11111111111111_birthcertificate_20250729065459.jpg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\uploads\\documents\\11111111111111_birthcertificate_20250729065459.jpg"
+    },
+    {
+      "Identity": "G:\\Cursor\\Projects\\admissionAllTeam\\server\\SchoolAdmission\\wwwroot\\uploads\\documents\\11111111111111_preferencessheet_20250729065459.jpg",
+      "SourceId": "SchoolAdmission",
+      "SourceType": "Discovered",
+      "ContentRoot": "G:\\Cursor\\Projects\\admissionAllTeam\\server\\SchoolAdmission\\wwwroot\\",
+      "BasePath": "_content/SchoolAdmission",
+      "RelativePath": "uploads/documents/11111111111111_preferencessheet_20250729065459.jpg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\uploads\\documents\\11111111111111_preferencessheet_20250729065459.jpg"
+    },
+    {
+      "Identity": "G:\\Cursor\\Projects\\admissionAllTeam\\server\\SchoolAdmission\\wwwroot\\uploads\\documents\\11111111111111_successreport_20250729065459.jpg",
+      "SourceId": "SchoolAdmission",
+      "SourceType": "Discovered",
+      "ContentRoot": "G:\\Cursor\\Projects\\admissionAllTeam\\server\\SchoolAdmission\\wwwroot\\",
+      "BasePath": "_content/SchoolAdmission",
+      "RelativePath": "uploads/documents/11111111111111_successreport_20250729065459.jpg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\uploads\\documents\\11111111111111_successreport_20250729065459.jpg"
+    },
+    {
+      "Identity": "G:\\Cursor\\Projects\\admissionAllTeam\\server\\SchoolAdmission\\wwwroot\\uploads\\documents\\11111111111111_tuitionfeereceipt_20250729065459.jpg",
+      "SourceId": "SchoolAdmission",
+      "SourceType": "Discovered",
+      "ContentRoot": "G:\\Cursor\\Projects\\admissionAllTeam\\server\\SchoolAdmission\\wwwroot\\",
+      "BasePath": "_content/SchoolAdmission",
+      "RelativePath": "uploads/documents/11111111111111_tuitionfeereceipt_20250729065459.jpg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\uploads\\documents\\11111111111111_tuitionfeereceipt_20250729065459.jpg"
+    }
+  ]
 }

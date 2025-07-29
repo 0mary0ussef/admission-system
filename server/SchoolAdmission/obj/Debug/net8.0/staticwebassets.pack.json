@@ -1,0 +1,37 @@
+{
+  "Files": [
+    {
+      "Id": "G:\\Cursor\\Projects\\admissionAllTeam\\server\\SchoolAdmission\\wwwroot\\uploads\\documents\\11111111111111_birthcertificate_20250729065459.jpg",
+      "PackagePath": "staticwebassets\\uploads\\documents\\11111111111111_birthcertificate_20250729065459.jpg"
+    },
+    {
+      "Id": "G:\\Cursor\\Projects\\admissionAllTeam\\server\\SchoolAdmission\\wwwroot\\uploads\\documents\\11111111111111_preferencessheet_20250729065459.jpg",
+      "PackagePath": "staticwebassets\\uploads\\documents\\11111111111111_preferencessheet_20250729065459.jpg"
+    },
+    {
+      "Id": "G:\\Cursor\\Projects\\admissionAllTeam\\server\\SchoolAdmission\\wwwroot\\uploads\\documents\\11111111111111_successreport_20250729065459.jpg",
+      "PackagePath": "staticwebassets\\uploads\\documents\\11111111111111_successreport_20250729065459.jpg"
+    },
+    {
+      "Id": "G:\\Cursor\\Projects\\admissionAllTeam\\server\\SchoolAdmission\\wwwroot\\uploads\\documents\\11111111111111_tuitionfeereceipt_20250729065459.jpg",
+      "PackagePath": "staticwebassets\\uploads\\documents\\11111111111111_tuitionfeereceipt_20250729065459.jpg"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.SchoolAdmission.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.SchoolAdmission.props",
+      "PackagePath": "build\\SchoolAdmission.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.SchoolAdmission.props",
+      "PackagePath": "buildMultiTargeting\\SchoolAdmission.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildTransitive.SchoolAdmission.props",
+      "PackagePath": "buildTransitive\\SchoolAdmission.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

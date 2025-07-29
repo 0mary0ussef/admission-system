@@ -45,7 +45,7 @@ public class AuthController : ControllerBase
             return BadRequest("Invalid email or password");
 
         var token = CreateToken(adminInDb.Email, "Admin");
-        return Ok(new { token });
+        return Ok(new { token, role = adminInDb.Role });
     }
 
     private string CreateToken(string email, string role)

@@ -74,6 +74,7 @@ public class AdminController : ControllerBase
             var totalWithInterview = examTotal + interviewScore;
             
             return new {
+                s.Id,
                 s.FullName,
                 s.Email,
                 s.NationalId,
@@ -99,12 +100,19 @@ public class AdminController : ControllerBase
             var interviewScores = s.InterviewScores
                 .Select(i => new { Admin = i.Admin.FullName, i.Score }).ToList();
 
-            var interviewScores2 = interviewScores[0].Score / 3 + interviewScores[1].Score / 3 + interviewScores[2].Score / 3;
+            // Calculate average interview score safely
+            double averageInterviewScore = 0;
+            if (interviewScores.Count > 0)
+            {
+                averageInterviewScore = interviewScores.Sum(i => i.Score) / interviewScores.Count;
+            }
+            
             var totalScore = (exam?.MathScore ?? 0) + (exam?.EnglishScore ?? 0) + (exam?.ArabicScore ?? 0) + (exam?.SoftwareScore ?? 0);
             var examTotal = GetExamTotal(exam);
-            var interviewPercentage = (examTotal + interviewScores2) / 100 * 100; 
+            var interviewPercentage = examTotal + averageInterviewScore; 
             
             return new {
+                s.Id,
                 s.FullName,
                 s.PhoneNumber,
                 s.NationalId,

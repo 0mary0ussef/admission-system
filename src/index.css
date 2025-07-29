@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+/* Custom Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f3f4f6; /* light gray, matches your site background */
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ef3131; /* your brand red */
+  border-radius: 8px;
+  border: 2px solid #f3f4f6; /* creates a gap effect */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #c41e1e; /* darker red on hover */
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #ef3131 #f3f4f6;
+}
+
+/* Cursor pointer for all clickable elements */
+button,
+[role="button"],
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+select,
+a,
+.card,
+.clickable,
+[onclick],
+[data-clickable="true"] {
+  cursor: pointer !important;
+}
+
+/* Ensure buttons and interactive elements show pointer */
+.btn,
+.button,
+.nav-link,
+.dropdown-item,
+.modal-close,
+.sort-button,
+.filter-button {
+  cursor: pointer !important;
+}
+
+/* Table rows that are clickable */
+tr[onclick],
+tr[data-clickable="true"],
+.table-row-clickable {
+  cursor: pointer !important;
+}
+
+/* Form elements that are interactive */
+input[type="checkbox"],
+input[type="radio"],
+input[type="file"] {
+  cursor: pointer !important;
+}
+
+/* Custom components that should be clickable */
+[data-testid*="button"],
+[data-testid*="link"],
+[data-testid*="clickable"] {
+  cursor: pointer !important;
+}
