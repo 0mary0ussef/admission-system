@@ -84,7 +84,7 @@ export const useStudents = () => {
         (student.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
           student.nationalId?.includes(searchTerm) ||
           student.email?.toLowerCase().includes(searchTerm.toLowerCase())) &&
-        (statusFilter === "all" || student.status === statusFilter)
+        (statusFilter === "all" || String(student.status) === statusFilter)
     )
     .sort((a, b) => {
       let aValue, bValue;
@@ -99,8 +99,8 @@ export const useStudents = () => {
           bValue = calculatePercentage(b);
           break;
         case "status":
-          aValue = a.status || "Pending";
-          bValue = b.status || "Pending";
+          aValue = String(a.status || "Pending");
+          bValue = String(b.status || "Pending");
           break;
         case "interviewScore":
           aValue = a.interviewScore || 0;

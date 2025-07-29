@@ -45,6 +45,7 @@ const SuperAdminDashboardPage = () => {
 
   const [showStatusConfirmation, setShowStatusConfirmation] = useState(false);
   const [pendingStatusChange, setPendingStatusChange] = useState(null);
+  const [selectedStatus, setSelectedStatus] = useState("Pending");
 
   useEffect(() => {
     // Check if super admin is authenticated
@@ -406,7 +407,7 @@ const SuperAdminDashboardPage = () => {
                   <option value="Accepted">Accepted</option>
                   <option value="Pending">Pending</option>
                   <option value="Rejected">Rejected</option>
-                  <option value="Waitlisted">Waitlisted</option>
+                  <option value="Waitlist">Waitlist</option>
                 </select>
               </div>
             </div>
@@ -499,24 +500,30 @@ const SuperAdminDashboardPage = () => {
                           <div className="flex items-center space-x-2">
                             <Badge
                               variant={
-                                student.status === "Accepted"
+                                String(student.status) === "Accepted"
                                   ? "success"
-                                  : student.status === "Waitlist"
+                                  : String(student.status) === "Waitlist"
                                   ? "warning"
-                                  : student.status === "Rejected"
+                                  : String(student.status) === "Rejected"
                                   ? "destructive"
                                   : "secondary"
                               }
                             >
-                              {student.status || "Pending"}
+                              {student.status
+                                ? String(student.status)
+                                : "Pending"}
                             </Badge>
                             <button
                               onClick={() => {
+                                // Ensure status is always a string
+                                const currentStatus = student.status
+                                  ? String(student.status)
+                                  : "Pending";
+                                setSelectedStatus(currentStatus);
                                 setPendingStatusChange({
                                   studentId: student.id,
                                   studentName: student.fullName,
-                                  oldStatus: student.status || "Pending",
-                                  newStatus: "Accepted",
+                                  oldStatus: currentStatus,
                                 });
                                 setShowStatusConfirmation(true);
                               }}
@@ -596,15 +603,39 @@ const SuperAdminDashboardPage = () => {
                 Change Status?
               </h3>
             </div>
+            <div className="mb-4">
+              <Label
+                htmlFor="status-select"
+                className="block mb-2 text-sm font-medium text-gray-700"
+              >
+                Select New Status for {pendingStatusChange?.studentName}:
+              </Label>
+              <select
+                id="status-select"
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
+                disabled={isSubmitting}
+              >
+                <option value="Pending">Pending</option>
+                <option value="Accepted">Accepted</option>
+                <option value="Rejected">Rejected</option>
+                <option value="Waitlist">Waitlist</option>
+              </select>
+            </div>
             <p className="text-gray-600 mb-6">
-              Are you sure you want to change the status of{" "}
-              <strong>{pendingStatusChange?.studentName}</strong> to{" "}
-              <strong>{pendingStatusChange?.newStatus}</strong>?
+              Current status: <strong>{pendingStatusChange?.oldStatus}</strong>
+              <br />
+              New status: <strong>{selectedStatus}</strong>
             </p>
             <div className="flex space-x-3">
               <Button
                 variant="outline"
-                onClick={() => setShowStatusConfirmation(false)}
+                onClick={() => {
+                  setShowStatusConfirmation(false);
+                  setPendingStatusChange(null);
+                  setSelectedStatus("Pending");
+                }}
                 className="flex-1"
               >
                 Cancel
@@ -614,10 +645,11 @@ const SuperAdminDashboardPage = () => {
                   if (pendingStatusChange) {
                     updateStudentStatus(
                       pendingStatusChange.studentId,
-                      pendingStatusChange.newStatus
+                      selectedStatus
                     );
                     setShowStatusConfirmation(false);
                     setPendingStatusChange(null);
+                    setSelectedStatus("Pending");
                   }
                 }}
                 className="flex-1 bg-red-600 hover:bg-red-700"

@@ -123,7 +123,7 @@ public class AdminController : ControllerBase
                 s.MinistryExamPercentage,
                 s.City,
                 s.District,
-                s.Status,
+                Status = s.Status.ToString(), // Convert enum to string
                 ExamMathScore = exam?.MathScore ?? 0,
                 ExamEnglishScore = exam?.EnglishScore ?? 0,
                 ExamSoftwareScore = exam?.SoftwareScore ?? 0,
