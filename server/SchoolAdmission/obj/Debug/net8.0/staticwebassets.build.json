@@ -1,0 +1,19 @@
+{
+  "Version": 1,
+  "Hash": "W8LbONNIkZn4MUEtCf6FdaQLCmJj2m8+81NQZQERIj8=",
+  "Source": "SchoolAdmission",
+  "BasePath": "_content/SchoolAdmission",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [
+    {
+      "Name": "SchoolAdmission\\wwwroot",
+      "Source": "SchoolAdmission",
+      "ContentRoot": "G:\\Cursor\\Projects\\AdmissionBackTeam\\server\\SchoolAdmission\\wwwroot\\",
+      "BasePath": "_content/SchoolAdmission",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": []
+}
