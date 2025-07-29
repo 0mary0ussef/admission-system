@@ -15,8 +15,23 @@ import { RadioGroup, RadioGroupItem } from "../components/ui/RadioGroup";
 
 const ExamPage = () => {
   const navigate = useNavigate();
-  const [timeLeft, setTimeLeft] = useState(60 * 60); // 60 minutes in seconds
   const [showFullScreenWarning, setShowFullScreenWarning] = useState(false);
+
+  // Timer state with localStorage persistence
+  const [timeLeft, setTimeLeft] = useState(() => {
+    const savedTime = localStorage.getItem("examTimeLeft");
+    const examStartTime = localStorage.getItem("examStartTime");
+
+    if (savedTime && examStartTime) {
+      const elapsed = Math.floor((Date.now() - parseInt(examStartTime)) / 1000);
+      const remaining = Math.max(0, 60 * 60 - elapsed); // 60 minutes - elapsed time
+      return remaining;
+    }
+
+    // First time starting exam
+    localStorage.setItem("examStartTime", Date.now().toString());
+    return 60 * 60; // 60 minutes in seconds
+  });
 
   const {
     currentSection,
@@ -40,9 +55,19 @@ const ExamPage = () => {
   } = useExam();
 
   useEffect(() => {
-    // Check if student is authenticated
+    // Enhanced authentication check
     const token = localStorage.getItem("studentToken");
-    if (!token) {
+    const nationalId = localStorage.getItem("studentNationalId");
+    const examData = localStorage.getItem("examStudentData");
+
+    if (!token || !nationalId || !examData) {
+      // Clear any partial exam data
+      localStorage.removeItem("examTimeLeft");
+      localStorage.removeItem("examStartTime");
+      localStorage.removeItem("studentToken");
+      localStorage.removeItem("studentNationalId");
+      localStorage.removeItem("examStudentData");
+
       navigate("/verify-student");
       return;
     }
@@ -60,21 +85,44 @@ const ExamPage = () => {
 
     enterFullScreen();
 
-    // Start timer
+    // Start timer with persistence
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
-        if (prev <= 1) {
+        const newTime = prev - 1;
+
+        // Save current time to localStorage
+        localStorage.setItem("examTimeLeft", newTime.toString());
+
+        if (newTime <= 0) {
           clearInterval(timer);
           // Auto-submit exam when time runs out
+          localStorage.removeItem("examTimeLeft");
+          localStorage.removeItem("examStartTime");
+          localStorage.removeItem("studentToken");
+          localStorage.removeItem("studentNationalId");
+          localStorage.removeItem("examStudentData");
           navigate("/");
           return 0;
         }
-        return prev - 1;
+        return newTime;
       });
     }, 1000);
 
     return () => clearInterval(timer);
   }, [navigate]);
+
+  // Clean up exam data when component unmounts
+  useEffect(() => {
+    return () => {
+      if (isCompleted) {
+        localStorage.removeItem("examTimeLeft");
+        localStorage.removeItem("examStartTime");
+        localStorage.removeItem("studentToken");
+        localStorage.removeItem("studentNationalId");
+        localStorage.removeItem("examStudentData");
+      }
+    };
+  }, [isCompleted]);
 
   useEffect(() => {
     const handleBeforeUnload = (e) => {
@@ -528,7 +576,15 @@ const ExamPage = () => {
                 Cancel
               </Button>
               <Button
-                onClick={() => navigate("/")}
+                onClick={() => {
+                  // Clear exam data when exiting
+                  localStorage.removeItem("examTimeLeft");
+                  localStorage.removeItem("examStartTime");
+                  localStorage.removeItem("studentToken");
+                  localStorage.removeItem("studentNationalId");
+                  localStorage.removeItem("examStudentData");
+                  navigate("/");
+                }}
                 className="flex-1 bg-red-600 hover:bg-red-700"
                 disabled={isSubmitting}
               >

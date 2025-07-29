@@ -149,6 +149,32 @@ public class StudentController : ControllerBase
         if (student == null)
             return NotFound("Student not found");
 
+        // Check if exam already exists for this student
+        var existingExam = await db.Exams.FirstOrDefaultAsync(e => e.StudentId == student.Id);
+        
+        if (existingExam != null)
+        {
+            // Update existing exam scores
+            existingExam.MathScore = dto.MathScore;
+            existingExam.EnglishScore = dto.EnglishScore;
+            existingExam.ArabicScore = dto.ArabicScore;
+            existingExam.SoftwareScore = dto.SoftwareScore;
+            
+            await db.SaveChangesAsync();
+            return Ok(new { 
+                message = "Exam results updated successfully",
+                exam = new {
+                    existingExam.Id,
+                    existingExam.StudentId,
+                    existingExam.MathScore,
+                    existingExam.EnglishScore,
+                    existingExam.ArabicScore,
+                    existingExam.SoftwareScore
+                }
+            });
+        }
+
+        // Create new exam record
         var exam = new Exam
         {
             StudentId = student.Id,
@@ -161,6 +187,16 @@ public class StudentController : ControllerBase
         db.Exams.Add(exam);
         await db.SaveChangesAsync();
         
-        return Ok(exam);
+        return Ok(new { 
+            message = "Exam submitted successfully",
+            exam = new {
+                exam.Id,
+                exam.StudentId,
+                exam.MathScore,
+                exam.EnglishScore,
+                exam.ArabicScore,
+                exam.SoftwareScore
+            }
+        });
     }
 }

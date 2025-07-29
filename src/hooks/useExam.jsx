@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { studentAPI } from "../utils/api";
 
 const examSections = [
@@ -72,13 +72,49 @@ const examSections = [
 ];
 
 export const useExam = () => {
-  const [currentSection, setCurrentSection] = useState(0);
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [answers, setAnswers] = useState({});
-  const [isCompleted, setIsCompleted] = useState(false);
+  const [currentSection, setCurrentSection] = useState(() => {
+    const saved = localStorage.getItem("examCurrentSection");
+    return saved ? parseInt(saved) : 0;
+  });
+
+  const [currentQuestion, setCurrentQuestion] = useState(() => {
+    const saved = localStorage.getItem("examCurrentQuestion");
+    return saved ? parseInt(saved) : 0;
+  });
+
+  const [answers, setAnswers] = useState(() => {
+    const saved = localStorage.getItem("examAnswers");
+    return saved ? JSON.parse(saved) : {};
+  });
+
+  const [isCompleted, setIsCompleted] = useState(() => {
+    const saved = localStorage.getItem("examCompleted");
+    return saved === "true";
+  });
+
   const [showExitWarning, setShowExitWarning] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+
+  // Persist current section
+  useEffect(() => {
+    localStorage.setItem("examCurrentSection", currentSection.toString());
+  }, [currentSection]);
+
+  // Persist current question
+  useEffect(() => {
+    localStorage.setItem("examCurrentQuestion", currentQuestion.toString());
+  }, [currentQuestion]);
+
+  // Persist answers
+  useEffect(() => {
+    localStorage.setItem("examAnswers", JSON.stringify(answers));
+  }, [answers]);
+
+  // Persist completion status
+  useEffect(() => {
+    localStorage.setItem("examCompleted", isCompleted.toString());
+  }, [isCompleted]);
 
   const totalQuestions = examSections.reduce(
     (sum, section) => sum + section.questions.length,
@@ -134,7 +170,7 @@ export const useExam = () => {
         }
       });
 
-      const sectionScore = Math.round((sectionCorrect / sectionTotal) * 100);
+      const sectionScore = Math.round((sectionCorrect / sectionTotal) * 15); // Max score of 15 per subject
 
       switch (section.name.toLowerCase()) {
         case "arabic":
@@ -167,7 +203,7 @@ export const useExam = () => {
 
       const scores = calculateSectionScores();
 
-      await studentAPI.submitExam({
+      const response = await studentAPI.submitExam({
         nationalId: nationalId,
         mathScore: scores.math,
         englishScore: scores.english,
@@ -175,12 +211,28 @@ export const useExam = () => {
         softwareScore: scores.software,
       });
 
+      // Handle both new and old response formats
+      const message = response.data?.message || "Exam submitted successfully";
+      console.log(message);
+
       setIsCompleted(true);
+
+      // Clear exam data after successful submission
+      localStorage.removeItem("examCurrentSection");
+      localStorage.removeItem("examCurrentQuestion");
+      localStorage.removeItem("examAnswers");
+      localStorage.removeItem("examCompleted");
     } catch (error) {
       console.error("Exam submission error:", error);
-      setSubmitError(
-        error.response?.data || "Failed to submit exam. Please try again."
-      );
+
+      // Handle specific error messages from backend
+      if (error.response?.data) {
+        setSubmitError(error.response.data);
+      } else if (error.message) {
+        setSubmitError(error.message);
+      } else {
+        setSubmitError("Failed to submit exam. Please try again.");
+      }
     } finally {
       setIsSubmitting(false);
     }

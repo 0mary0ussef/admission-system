@@ -12,13 +12,27 @@ const api = axios.create({
 // Request interceptor to add auth tokens
 api.interceptors.request.use(
   (config) => {
+    // Don't add auth headers for student validation and exam submission endpoints
+    if (
+      config.url &&
+      (config.url.includes("/Student/validate/") ||
+        config.url.includes("/Student/validate-exam/") ||
+        config.url.includes("/Student/submit-exam"))
+    ) {
+      return config;
+    }
+
     const adminToken = localStorage.getItem("adminToken");
     const teacherToken = localStorage.getItem("teacherToken");
+    const studentToken = localStorage.getItem("studentToken");
 
     if (adminToken) {
       config.headers.Authorization = `Bearer ${adminToken}`;
     } else if (teacherToken) {
       config.headers.Authorization = `Bearer ${teacherToken}`;
+    } else if (studentToken && config.url && config.url.includes("/Student/")) {
+      // Add student token for student API calls
+      config.headers.Authorization = `Bearer ${studentToken}`;
     }
 
     return config;
@@ -36,7 +50,18 @@ api.interceptors.response.use(
       // Clear tokens and redirect to login
       localStorage.removeItem("adminToken");
       localStorage.removeItem("teacherToken");
-      window.location.href = "/admin/login";
+      localStorage.removeItem("studentToken");
+      localStorage.removeItem("studentNationalId");
+      localStorage.removeItem("examStudentData");
+
+      // Redirect based on current page
+      if (window.location.pathname.includes("/admin")) {
+        window.location.href = "/admin/login";
+      } else if (window.location.pathname.includes("/teacher")) {
+        window.location.href = "/teacher/login";
+      } else {
+        window.location.href = "/verify-student";
+      }
     }
     return Promise.reject(error);
   }
