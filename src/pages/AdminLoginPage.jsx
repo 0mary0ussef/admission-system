@@ -27,11 +27,35 @@ const AdminLoginPage = () => {
     setIsLoading(true);
     setError("");
 
-    // Mock authentication - in real app, this would call your backend
-    if (email === "admin@elsewedy-school.edu.eg" && password === "admin123") {
-      // Store auth token in localStorage (in real app, use secure storage)
+    // Admin credentials
+    const adminCredentials = {
+      email: "admin@elsewedy-school.edu.eg",
+      password: "admin123",
+    };
+
+    // Super Admin credentials
+    const superAdminCredentials = {
+      email: "superadmin@el-sewedy.edu.eg",
+      password: "SuperAdmin2024!",
+    };
+
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    if (
+      email === adminCredentials.email &&
+      password === adminCredentials.password
+    ) {
+      // Regular admin authentication
       localStorage.setItem("adminToken", "mock-token");
       navigate("/admin/dashboard");
+    } else if (
+      email === superAdminCredentials.email &&
+      password === superAdminCredentials.password
+    ) {
+      // Super admin authentication
+      localStorage.setItem("superAdminToken", "authenticated");
+      navigate("/super-admin/dashboard");
     } else {
       setError("Invalid email or password");
     }
@@ -143,8 +167,25 @@ const AdminLoginPage = () => {
 
               <div className="mt-6 bg-gray-50 rounded-lg p-4 text-sm text-gray-600 text-center">
                 <p className="font-medium mb-2">Demo credentials:</p>
-                <p className="font-mono">admin@elsewedy-school.edu.eg</p>
-                <p className="font-mono">admin123</p>
+                <div className="space-y-3">
+                  <div>
+                    <p className="font-medium text-gray-700 mb-1">
+                      Regular Admin:
+                    </p>
+                    <p className="font-mono">admin@elsewedy-school.edu.eg</p>
+                    <p className="font-mono">admin123</p>
+                  </div>
+
+                  <div className="pt-2 border-t border-gray-200">
+                    <p className="font-medium text-purple-600 mb-1">
+                      Super Admin:
+                    </p>
+                    <p className="font-mono text-purple-700">
+                      superadmin@el-sewedy.edu.eg
+                    </p>
+                    <p className="font-mono text-purple-700">SuperAdmin2024!</p>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>

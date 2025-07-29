@@ -22,7 +22,7 @@ const RegisterStudentPage = () => {
     mathScore: "",
     englishScore: "",
     thirdPrepScore: "",
-    acceptanceLetter: false,
+    ministryExamPercentage: "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -43,6 +43,9 @@ const RegisterStudentPage = () => {
     e.preventDefault();
     setIsLoading(true);
 
+    // Scroll to top to show any validation messages
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1500));
 
@@ -56,7 +59,7 @@ const RegisterStudentPage = () => {
       mathScore: "",
       englishScore: "",
       thirdPrepScore: "",
-      acceptanceLetter: false,
+      ministryExamPercentage: "",
     });
 
     setIsLoading(false);
@@ -228,29 +231,30 @@ const RegisterStudentPage = () => {
                   </div>
                 </div>
 
-                <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
-                  <div className="flex items-start space-x-3">
-                    <Checkbox
-                      id="acceptanceLetter"
-                      checked={formData.acceptanceLetter}
-                      onCheckedChange={(checked) =>
-                        handleInputChange("acceptanceLetter", checked)
-                      }
-                      className="mt-1"
-                    />
-                    <div className="flex-1">
-                      <Label
-                        htmlFor="acceptanceLetter"
-                        className="text-base font-medium text-gray-700 cursor-pointer block"
-                      >
-                        Acceptance Letter Received
-                      </Label>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Confirm that the student has received their acceptance
-                        letter
-                      </p>
-                    </div>
-                  </div>
+                <div>
+                  <Label
+                    htmlFor="ministryExamPercentage"
+                    className="text-base font-medium text-gray-700"
+                  >
+                    Ministry Exam Percentage:
+                  </Label>
+                  <Input
+                    id="ministryExamPercentage"
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    value={formData.ministryExamPercentage}
+                    onChange={(e) =>
+                      handleInputChange(
+                        "ministryExamPercentage",
+                        e.target.value
+                      )
+                    }
+                    placeholder="Enter Ministry Exam percentage (0-100)"
+                    className="mt-2 h-11 md:h-12 text-base"
+                    required
+                  />
                 </div>
 
                 <Button

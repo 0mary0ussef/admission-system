@@ -9,6 +9,8 @@ import ExamPage from "./pages/ExamPage";
 import ContactPage from "./pages/ContactPage";
 import AdminLoginPage from "./pages/AdminLoginPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
+
+import SuperAdminDashboardPage from "./pages/SuperAdminDashboardPage";
 import TeacherLoginPage from "./pages/TeacherLoginPage";
 import RegisterStudentPage from "./pages/RegisterStudentPage";
 import ApplyPage from "./pages/ApplyPage";
@@ -37,6 +39,10 @@ function App() {
             <Route path="/apply" element={<ApplyPage />} />
             <Route path="/admin/login" element={<AdminLoginPage />} />
             <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+            <Route
+              path="/super-admin/dashboard"
+              element={<SuperAdminDashboardPage />}
+            />
             <Route path="/teacher/login" element={<TeacherLoginPage />} />
             <Route
               path="/teacher/register-student"

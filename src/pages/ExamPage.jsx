@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useExam } from "../hooks/useExam";
 import Button from "../components/ui/Button";
@@ -15,6 +15,9 @@ import { RadioGroup, RadioGroupItem } from "../components/ui/RadioGroup";
 
 const ExamPage = () => {
   const navigate = useNavigate();
+  const [timeLeft, setTimeLeft] = useState(60 * 60); // 60 minutes in seconds
+  const [showFullScreenWarning, setShowFullScreenWarning] = useState(false);
+
   const {
     currentSection,
     currentQuestion,
@@ -28,7 +31,7 @@ const ExamPage = () => {
     nextQuestion,
     prevQuestion,
     setShowExitWarning,
-    calculateScore,
+
     examSections,
     setCurrentSection,
     setCurrentQuestion,
@@ -39,7 +42,36 @@ const ExamPage = () => {
     const token = localStorage.getItem("studentToken");
     if (!token) {
       navigate("/verify");
+      return;
     }
+
+    // Enter full-screen mode when exam starts
+    const enterFullScreen = async () => {
+      try {
+        if (document.documentElement.requestFullscreen) {
+          await document.documentElement.requestFullscreen();
+        }
+      } catch {
+        // Full-screen not supported or denied
+      }
+    };
+
+    enterFullScreen();
+
+    // Start timer
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          // Auto-submit exam when time runs out
+          navigate("/");
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
   }, [navigate]);
 
   useEffect(() => {
@@ -50,8 +82,94 @@ const ExamPage = () => {
       }
     };
 
+    const handleFullScreenChange = () => {
+      if (!document.fullscreenElement) {
+        // Immediately try to re-enter full-screen
+        setTimeout(async () => {
+          try {
+            await document.documentElement.requestFullscreen();
+          } catch {
+            setShowFullScreenWarning(true);
+          }
+        }, 100);
+      }
+    };
+
+    const handleKeyDown = (e) => {
+      // Prevent F11, Alt+F4, Ctrl+W, ESC, etc.
+      if (
+        e.key === "F11" ||
+        e.key === "Escape" ||
+        (e.altKey && e.key === "F4") ||
+        (e.ctrlKey && e.key === "w") ||
+        (e.ctrlKey && e.key === "W") ||
+        (e.ctrlKey && e.key === "t") ||
+        (e.ctrlKey && e.key === "T") ||
+        (e.ctrlKey && e.key === "n") ||
+        (e.ctrlKey && e.key === "N")
+      ) {
+        e.preventDefault();
+        e.stopPropagation();
+        setShowFullScreenWarning(true);
+        return false;
+      }
+    };
+
+    const handleWindowBlur = () => {
+      setShowFullScreenWarning(true);
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        setShowFullScreenWarning(true);
+      }
+    };
+
+    const handleClickOutside = (e) => {
+      // If click is outside the main exam container, show warning
+      const examContainer = document.querySelector(".exam-container");
+      if (examContainer && !examContainer.contains(e.target)) {
+        e.preventDefault();
+        e.stopPropagation();
+        setShowFullScreenWarning(true);
+      }
+    };
+
     window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("blur", handleWindowBlur);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    document.addEventListener("fullscreenchange", handleFullScreenChange);
+    document.addEventListener("keydown", handleKeyDown, true); // Use capture phase
+    document.addEventListener(
+      "keyup",
+      (e) => {
+        if (e.key === "Escape") {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      },
+      true
+    );
+    document.addEventListener("click", handleClickOutside, true);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("blur", handleWindowBlur);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      document.removeEventListener("fullscreenchange", handleFullScreenChange);
+      document.removeEventListener("keydown", handleKeyDown, true);
+      document.removeEventListener(
+        "keyup",
+        (e) => {
+          if (e.key === "Escape") {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        },
+        true
+      );
+      document.removeEventListener("click", handleClickOutside, true);
+    };
   }, [isCompleted]);
 
   // Prevent scrolling when modal is open
@@ -69,7 +187,6 @@ const ExamPage = () => {
   }, [showExitWarning]);
 
   if (isCompleted) {
-    const score = calculateScore();
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
         <div className="py-12">
@@ -122,8 +239,8 @@ const ExamPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Exit Button */}
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 exam-container">
+      {/* Header with Timer and Exit Button */}
       <div className="bg-white shadow-sm sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -146,6 +263,27 @@ const ExamPage = () => {
               </svg>
               Exit Exam
             </button>
+
+            {/* Timer Display */}
+            <div className="flex items-center space-x-2">
+              <svg
+                className="h-5 w-5 text-red-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <span className="text-lg font-bold text-red-500">
+                {Math.floor(timeLeft / 60)}:
+                {(timeLeft % 60).toString().padStart(2, "0")}
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -363,6 +501,53 @@ const ExamPage = () => {
                 className="flex-1 bg-red-600 hover:bg-red-700"
               >
                 Exit Exam
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Full Screen Warning Modal */}
+      {showFullScreenWarning && (
+        <div className="fixed inset-0 backdrop-blur-sm bg-opacity-10 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-2xl">
+            <div className="flex items-center mb-4">
+              <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mr-4">
+                <svg
+                  className="w-6 h-6 text-orange-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900">
+                Full Screen Required
+              </h3>
+            </div>
+            <p className="text-gray-600 mb-6">
+              The exam must be taken in full-screen mode. Please return to
+              full-screen to continue.
+            </p>
+            <div className="flex space-x-3">
+              <Button
+                onClick={async () => {
+                  try {
+                    await document.documentElement.requestFullscreen();
+                    setShowFullScreenWarning(false);
+                  } catch {
+                    // Full-screen request denied
+                  }
+                }}
+                className="flex-1 bg-orange-600 hover:bg-orange-700"
+              >
+                Return to Full Screen
               </Button>
             </div>
           </div>

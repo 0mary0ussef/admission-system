@@ -18,6 +18,12 @@ import Footer from "../components/layout/Footer";
 
 const CompleteStudentInfoPage = () => {
   const [formData, setFormData] = useState({
+    studentName: "",
+    nationalId: "",
+    mathScore: "",
+    englishScore: "",
+    prepScore: "",
+    ministryExamPercentage: "",
     dateOfBirth: "",
     parentOccupation: "",
     address: "",
@@ -26,6 +32,10 @@ const CompleteStudentInfoPage = () => {
     streetBuilding: "",
     phoneNumber: "",
     email: "",
+    birthCertificate: null,
+    successStatement: null,
+    paymentReceipt: null,
+    desireSheet: null,
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -37,7 +47,27 @@ const CompleteStudentInfoPage = () => {
     const nationalId = localStorage.getItem("studentNationalId");
     if (!nationalId) {
       navigate("/check-national-id");
+      return;
     }
+
+    // Load student information from localStorage or mock data
+    const loadStudentInfo = () => {
+      const mockStudentData = {
+        studentName: "Ahmed Mohamed Ali",
+        nationalId: nationalId,
+        mathScore: "85",
+        englishScore: "78",
+        prepScore: "92",
+        ministryExamPercentage: "95.5",
+      };
+
+      setFormData((prev) => ({
+        ...prev,
+        ...mockStudentData,
+      }));
+    };
+
+    loadStudentInfo();
   }, [navigate]);
 
   const handleInputChange = (field, value) => {
@@ -58,6 +88,13 @@ const CompleteStudentInfoPage = () => {
     }));
   };
 
+  const handleFileChange = (field, file) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: file,
+    }));
+  };
+
   const validateForm = () => {
     const errors = [];
 
@@ -72,17 +109,35 @@ const CompleteStudentInfoPage = () => {
     if (!formData.phoneNumber) errors.push("Phone Number is required");
     if (!formData.email) errors.push("Email Address is required");
 
-    // Validate date format (HTML date input returns yyyy-mm-dd)
+    // Validate file uploads
+    if (!formData.birthCertificate)
+      errors.push("Birth Certificate is required");
+    if (!formData.successStatement)
+      errors.push("Success Statement is required");
+    if (!formData.paymentReceipt) errors.push("Payment Receipt is required");
+    if (!formData.desireSheet) errors.push("Desire Sheet is required");
+
+    // Validate date format and age requirement (must be 18 or younger on October 1st)
     if (formData.dateOfBirth) {
       const date = new Date(formData.dateOfBirth);
       const today = new Date();
-      const minDate = new Date("1990-01-01");
-      const maxDate = new Date("2010-12-31");
+      const currentYear = today.getFullYear();
+      const octoberFirst = new Date(currentYear, 9, 1); // October 1st (month is 0-indexed)
+
+      // If today is before October 1st, use previous year
+      if (today < octoberFirst) {
+        octoberFirst.setFullYear(currentYear - 1);
+      }
+
+      const minDate = new Date(octoberFirst.getFullYear() - 18, 9, 1); // 18 years before October 1st
+      const maxDate = new Date(octoberFirst.getFullYear() - 1, 9, 1); // 1 year before October 1st
 
       if (isNaN(date.getTime())) {
         errors.push("Please enter a valid Date of Birth");
       } else if (date < minDate || date > maxDate) {
-        errors.push("Date of Birth must be between 1990 and 2010");
+        errors.push(
+          "Student must be 18 years or younger on October 1st of the current academic year"
+        );
       }
     }
 
@@ -112,6 +167,9 @@ const CompleteStudentInfoPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Scroll to top to show any validation messages
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
     const errors = validateForm();
     if (errors.length > 0) {
       setError(errors.join(", "));
@@ -122,7 +180,6 @@ const CompleteStudentInfoPage = () => {
     setError("");
     setSuccess("");
 
-    // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
     // Store the completed information
@@ -239,6 +296,63 @@ const CompleteStudentInfoPage = () => {
                     </AlertDescription>
                   </Alert>
                 )}
+
+                {/* Student Information Display */}
+                <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
+                  <h3 className="text-lg font-semibold text-blue-900 mb-4">
+                    Student Information
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-sm font-medium text-blue-700">
+                        Student Name
+                      </Label>
+                      <p className="text-blue-900 font-medium">
+                        {formData.studentName}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium text-blue-700">
+                        National ID
+                      </Label>
+                      <p className="text-blue-900 font-medium">
+                        {formData.nationalId}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium text-blue-700">
+                        Math Score
+                      </Label>
+                      <p className="text-blue-900 font-medium">
+                        {formData.mathScore}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium text-blue-700">
+                        English Score
+                      </Label>
+                      <p className="text-blue-900 font-medium">
+                        {formData.englishScore}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium text-blue-700">
+                        Prep Score
+                      </Label>
+                      <p className="text-blue-900 font-medium">
+                        {formData.prepScore}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium text-blue-700">
+                        Ministry Exam Percentage
+                      </Label>
+                      <p className="text-blue-900 font-medium">
+                        {formData.ministryExamPercentage}%
+                      </p>
+                    </div>
+                  </div>
+                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
@@ -381,6 +495,97 @@ const CompleteStudentInfoPage = () => {
                       className="mt-2 h-12 text-lg"
                       validation={{ email: true }}
                     />
+                  </div>
+                </div>
+
+                {/* File Upload Section */}
+                <div className="space-y-6">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Required Documents
+                  </h3>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <Label
+                        htmlFor="birthCertificate"
+                        className="text-base font-medium"
+                      >
+                        شهادة الميلاد *
+                      </Label>
+                      <input
+                        id="birthCertificate"
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={(e) =>
+                          handleFileChange(
+                            "birthCertificate",
+                            e.target.files[0]
+                          )
+                        }
+                        className="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#ef3131] file:text-white hover:file:bg-red-600 cursor-pointer"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <Label
+                        htmlFor="successStatement"
+                        className="text-base font-medium"
+                      >
+                        بيان نجاح *
+                      </Label>
+                      <input
+                        id="successStatement"
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={(e) =>
+                          handleFileChange(
+                            "successStatement",
+                            e.target.files[0]
+                          )
+                        }
+                        className="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#ef3131] file:text-white hover:file:bg-red-600 cursor-pointer"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <Label
+                        htmlFor="paymentReceipt"
+                        className="text-base font-medium"
+                      >
+                        ايصال السداد *
+                      </Label>
+                      <input
+                        id="paymentReceipt"
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={(e) =>
+                          handleFileChange("paymentReceipt", e.target.files[0])
+                        }
+                        className="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#ef3131] file:text-white hover:file:bg-red-600 cursor-pointer"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <Label
+                        htmlFor="desireSheet"
+                        className="text-base font-medium"
+                      >
+                        ورقة الرغبات *
+                      </Label>
+                      <input
+                        id="desireSheet"
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={(e) =>
+                          handleFileChange("desireSheet", e.target.files[0])
+                        }
+                        className="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#ef3131] file:text-white hover:file:bg-red-600 cursor-pointer"
+                        required
+                      />
+                    </div>
                   </div>
                 </div>
 

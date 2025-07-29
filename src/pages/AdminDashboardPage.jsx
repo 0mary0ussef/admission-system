@@ -44,8 +44,6 @@ const AdminDashboardPage = () => {
     sortBy,
     sortOrder,
     handleSort,
-    statusFilter,
-    setStatusFilter,
   } = useStudents();
 
   const [showStatusConfirmation, setShowStatusConfirmation] = useState(false);
@@ -79,11 +77,6 @@ const AdminDashboardPage = () => {
   const handleLogout = () => {
     localStorage.removeItem("adminToken");
     navigate("/");
-  };
-
-  const openWhatsApp = (phone) => {
-    const cleanPhone = phone.replace(/[^0-9]/g, "");
-    window.open(`https://wa.me/${cleanPhone}`, "_blank");
   };
 
   return (
@@ -344,22 +337,34 @@ const AdminDashboardPage = () => {
                 </span>
               </Button>
 
-              <div className="flex items-center space-x-2 ml-auto">
-                <label className="text-sm font-medium text-gray-700">
-                  Filter by Status:
-                </label>
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#ef3131] focus:border-transparent"
+              <Button
+                variant={sortBy === "interviewScore" ? "default" : "outline"}
+                onClick={() => handleSort("interviewScore")}
+                className={`flex items-center space-x-2 ${
+                  sortBy === "interviewScore"
+                    ? "bg-[#ef3131] hover:bg-red-600"
+                    : "border-gray-300 hover:border-[#ef3131] hover:text-[#ef3131]"
+                }`}
+              >
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
-                  <option value="all">All Students</option>
-                  <option value="Accepted">Accepted</option>
-                  <option value="Pending">Pending</option>
-                  <option value="Rejected">Rejected</option>
-                  <option value="Waitlisted">Waitlisted</option>
-                </select>
-              </div>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"
+                  />
+                </svg>
+                <span>
+                  Interview Score{" "}
+                  {sortBy === "interviewScore" &&
+                    (sortOrder === "desc" ? "↓" : "↑")}
+                </span>
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -377,13 +382,11 @@ const AdminDashboardPage = () => {
                     <TableHead>Name</TableHead>
                     <TableHead>National ID</TableHead>
                     <TableHead>Prep Scores</TableHead>
-                    <TableHead>Acceptance</TableHead>
-                    <TableHead>Contact</TableHead>
+                    <TableHead>Ministry Exam %</TableHead>
                     <TableHead>Exam Scores</TableHead>
                     <TableHead>Total</TableHead>
                     <TableHead>Interview Score</TableHead>
                     <TableHead>Percentage</TableHead>
-                    <TableHead>Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -411,40 +414,8 @@ const AdminDashboardPage = () => {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge
-                          variant={
-                            student.acceptanceLetter ? "default" : "secondary"
-                          }
-                        >
-                          {student.acceptanceLetter ? "Received" : "Pending"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="space-y-1">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => openWhatsApp(student.phone)}
-                            className="w-full"
-                          >
-                            <svg
-                              className="h-3 w-3 mr-1"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                              />
-                            </svg>
-                            WhatsApp
-                          </Button>
-                          <div className="text-xs text-gray-500">
-                            {student.phone}
-                          </div>
+                        <div className="text-sm font-medium">
+                          {student.ministryExamPercentage || 0}%
                         </div>
                       </TableCell>
                       <TableCell>
@@ -619,26 +590,6 @@ const AdminDashboardPage = () => {
                         <div className="font-bold text-blue-600">
                           {calculatePercentage(student)}%
                         </div>
-                      </TableCell>
-                      <TableCell>
-                        <select
-                          value={student.status}
-                          onChange={(e) => {
-                            setPendingStatusChange({
-                              studentId: student.id,
-                              newStatus: e.target.value,
-                              studentName: student.name,
-                              oldStatus: student.status,
-                            });
-                            setShowStatusConfirmation(true);
-                          }}
-                          className="text-sm border rounded p-1 cursor-pointer"
-                        >
-                          <option value="Pending">Pending</option>
-                          <option value="Accepted">Accepted</option>
-                          <option value="Rejected">Rejected</option>
-                          <option value="Waitlisted">Waitlisted</option>
-                        </select>
                       </TableCell>
                     </TableRow>
                   ))}

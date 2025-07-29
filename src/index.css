@@ -26,3 +26,50 @@
   scrollbar-width: thin;
   scrollbar-color: #ef3131 #f3f4f6;
 }
+
+/* Cursor pointer for all clickable elements */
+button,
+[role="button"],
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+select,
+a,
+.card,
+.clickable,
+[onclick],
+[data-clickable="true"] {
+  cursor: pointer !important;
+}
+
+/* Ensure buttons and interactive elements show pointer */
+.btn,
+.button,
+.nav-link,
+.dropdown-item,
+.modal-close,
+.sort-button,
+.filter-button {
+  cursor: pointer !important;
+}
+
+/* Table rows that are clickable */
+tr[onclick],
+tr[data-clickable="true"],
+.table-row-clickable {
+  cursor: pointer !important;
+}
+
+/* Form elements that are interactive */
+input[type="checkbox"],
+input[type="radio"],
+input[type="file"] {
+  cursor: pointer !important;
+}
+
+/* Custom components that should be clickable */
+[data-testid*="button"],
+[data-testid*="link"],
+[data-testid*="clickable"] {
+  cursor: pointer !important;
+}
