@@ -47,7 +47,7 @@ const ApplyOptionsPage = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-20">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
             {/* Teacher Application */}
             <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow bg-white h-full flex flex-col">
               <CardHeader className="text-center pb-4 md:pb-6 flex-shrink-0">
@@ -259,6 +259,109 @@ const ApplyOptionsPage = () => {
                   <Link to="/check-national-id">
                     <Button className="w-full bg-[#ef3131] hover:bg-red-600 text-sm md:text-lg py-2 md:py-3 rounded-full font-semibold">
                       Check & Complete Info
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Staff Admin */}
+            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow bg-white h-full flex flex-col">
+              <CardHeader className="text-center pb-4 md:pb-6 flex-shrink-0">
+                <div className="w-16 h-16 md:w-20 md:h-20 bg-[#ef3131]/10 rounded-2xl flex items-center justify-center mx-auto mb-4 md:mb-6">
+                  <svg
+                    className="h-8 w-8 md:h-10 md:w-10 text-[#ef3131]"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                </div>
+                <CardTitle className="text-xl md:text-2xl font-bold text-gray-900">
+                  Staff Admin
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-center space-y-6 flex-grow flex flex-col">
+                <p className="text-gray-600 leading-relaxed font-light text-sm md:text-base flex-grow">
+                  Access the staff admin portal to view, edit, and manage all
+                  student information and admission records.
+                </p>
+
+                <div className="space-y-3 md:space-y-4">
+                  <div className="flex items-center text-left">
+                    <svg
+                      className="h-4 w-4 md:h-5 md:w-5 text-[#ef3131] mr-3 flex-shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                      />
+                    </svg>
+                    <span className="text-gray-700 text-sm md:text-base">
+                      Search and view student records
+                    </span>
+                  </div>
+                  <div className="flex items-center text-left">
+                    <svg
+                      className="h-4 w-4 md:h-5 md:w-5 text-[#ef3131] mr-3 flex-shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                      />
+                    </svg>
+                    <span className="text-gray-700 text-sm md:text-base">
+                      Edit student information
+                    </span>
+                  </div>
+                  <div className="flex items-center text-left">
+                    <svg
+                      className="h-4 w-4 md:h-5 md:w-5 text-[#ef3131] mr-3 flex-shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                      />
+                    </svg>
+                    <span className="text-gray-700 text-sm md:text-base">
+                      Monitor admission statistics
+                    </span>
+                  </div>
+                </div>
+
+                <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 md:p-4 text-xs md:text-sm text-purple-800">
+                  <p className="font-medium mb-1">Admin Access:</p>
+                  <p>
+                    Login with your staff credentials to access the admin
+                    management system.
+                  </p>
+                </div>
+
+                <div className="mt-6">
+                  <Link to="/staff/login">
+                    <Button className="w-full bg-[#ef3131] hover:bg-red-600 text-sm md:text-lg py-2 md:py-3 rounded-full font-semibold">
+                      Staff Login
                     </Button>
                   </Link>
                 </div>

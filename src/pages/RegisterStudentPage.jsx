@@ -32,6 +32,11 @@ const RegisterStudentPage = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [birthdateError, setBirthdateError] = useState("");
+  const [age, setAge] = useState("");
+  const [isDobValid, setIsDobValid] = useState(null);
+  const [students, setStudents] = useState([]);
+  const [isStudentsModalOpen, setIsStudentsModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -40,7 +45,32 @@ const RegisterStudentPage = () => {
     if (!token) {
       navigate("/teacher/login");
     }
+
+    // Load locally tracked students (frontend-only cache)
+    try {
+      const raw = localStorage.getItem("registeredStudentsLocal");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) setStudents(parsed);
+      }
+    } catch {
+      // ignore parsing errors
+    }
   }, [navigate]);
+
+  const calculateAge = (dateValue) => {
+    if (!dateValue) return "";
+    const birth = new Date(dateValue);
+    if (isNaN(birth.getTime())) return "";
+    const today = new Date();
+    let years = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    const dayDiff = today.getDate() - birth.getDate();
+    if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+      years -= 1;
+    }
+    return years.toString();
+  };
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -53,11 +83,19 @@ const RegisterStudentPage = () => {
       // Clear error immediately when user starts typing
       if (birthdateError) setBirthdateError("");
 
+      // Update age display immediately
+      setAge(calculateAge(value));
+
       if (value) {
         // Add a small delay to avoid showing error while user is still typing
         setTimeout(() => {
-          validateDateOfBirth(value);
+          const res = validateDateOfBirth(value);
+          setIsDobValid(res === null);
         }, 500);
+      } else {
+        // If cleared, reset age and validation state
+        setAge("");
+        setIsDobValid(null);
       }
     } else {
       // Clear birthdate error when user types in other fields
@@ -68,6 +106,7 @@ const RegisterStudentPage = () => {
   const validateDateOfBirth = (dateValue) => {
     if (!dateValue) {
       setBirthdateError("Date of Birth is required");
+      setIsDobValid(false);
       return "Date of Birth is required";
     }
 
@@ -76,6 +115,7 @@ const RegisterStudentPage = () => {
     // Check if the date is valid
     if (isNaN(dateOfBirth.getTime())) {
       setBirthdateError("Please enter a valid date");
+      setIsDobValid(false);
       return "Please enter a valid date";
     }
 
@@ -95,11 +135,13 @@ const RegisterStudentPage = () => {
       setBirthdateError(
         "Student must be 18 years or younger on October 1st of the current academic year"
       );
+      setIsDobValid(false);
       return "Student must be 18 years or younger on October 1st of the current academic year";
     }
 
     // Clear error if date is valid
     setBirthdateError("");
+    setIsDobValid(true);
     return null; // No error
   };
 
@@ -171,6 +213,25 @@ const RegisterStudentPage = () => {
 
       setSuccess("Student registered successfully!");
 
+      // Frontend-only: append to local cache for counter and modal
+      const newLocalStudent = {
+        id: `${formData.nationalId}-${Date.now()}`,
+        fullName: formData.studentName,
+        nationalId: formData.nationalId,
+        dateOfBirth: formData.dateOfBirth,
+        status: "Registered",
+        registeredAt: new Date().toISOString(),
+      };
+      setStudents((prev) => {
+        const next = [newLocalStudent, ...prev];
+        try {
+          localStorage.setItem("registeredStudentsLocal", JSON.stringify(next));
+        } catch {
+          // ignore storage errors
+        }
+        return next;
+      });
+
       // Reset form
       setFormData({
         studentName: "",
@@ -183,6 +244,8 @@ const RegisterStudentPage = () => {
       });
       setIsAcceptanceLetterReceived(false);
       setBirthdateError(""); // Clear birthdate error
+      setAge("");
+      setIsDobValid(null);
     } catch (err) {
       console.error("Registration error:", err);
       console.error("Error response:", err.response);
@@ -221,7 +284,24 @@ const RegisterStudentPage = () => {
           </Link>
 
           <Card className="border-0 shadow-2xl bg-white">
-            <CardHeader className="text-center bg-gradient-to-r from-[#ef3131] to-red-500 text-white">
+            <CardHeader className="relative text-center bg-gradient-to-r from-[#ef3131] to-red-500 text-white">
+              <button
+                type="button"
+                onClick={() => setIsStudentsModalOpen(true)}
+                className="absolute top-4 right-4 inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-3 py-2 rounded-full backdrop-blur transition"
+                aria-label="Show registered students"
+                title="Show registered students"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="w-5 h-5"
+                >
+                  <path d="M12 12c2.761 0 5-2.916 5-6.5S14.761 0 12 0 7 2.916 7 6.5 9.239 12 12 12zm0 2c-4.418 0-8 2.015-8 4.5V21a1 1 0 001 1h14a1 1 0 001-1v-2.5c0-2.485-3.582-4.5-8-4.5z" />
+                </svg>
+                <span className="text-sm font-semibold">{students.length}</span>
+              </button>
               <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <svg
                   className="h-8 w-8 text-white"
@@ -312,30 +392,54 @@ const RegisterStudentPage = () => {
                   >
                     Date of Birth:
                   </Label>
-                  <Input
-                    id="dateOfBirth"
-                    type="date"
-                    value={formData.dateOfBirth}
-                    onChange={(e) =>
-                      handleInputChange("dateOfBirth", e.target.value)
-                    }
-                    onBlur={(e) => {
-                      if (e.target.value) {
-                        validateDateOfBirth(e.target.value);
+                  <div className="mt-2 flex items-center gap-3">
+                    <Input
+                      id="dateOfBirth"
+                      type="date"
+                      value={formData.dateOfBirth}
+                      onChange={(e) =>
+                        handleInputChange("dateOfBirth", e.target.value)
                       }
-                    }}
-                    className="mt-2 h-11 md:h-12 text-base"
-                    required
-                    max={new Date().toISOString().split("T")[0]}
-                    validation={{
-                      custom: (value) => {
-                        if (!value) return true; // Let required validation handle empty
-                        const error = validateDateOfBirth(value);
-                        return error === null ? true : error;
-                      },
-                    }}
-                    showValidation={true}
-                  />
+                      onBlur={(e) => {
+                        if (e.target.value) {
+                          const res = validateDateOfBirth(e.target.value);
+                          setIsDobValid(res === null);
+                        }
+                      }}
+                      className="h-11 md:h-12 text-base"
+                      required
+                      max={new Date().toISOString().split("T")[0]}
+                      validation={{
+                        custom: (value) => {
+                          if (!value) return true; // Let required validation handle empty
+                          const error = validateDateOfBirth(value);
+                          return error === null ? true : error;
+                        },
+                      }}
+                      showValidation={true}
+                      hideErrorMessage={true}
+                    />
+                    <input
+                      id="age"
+                      value={age}
+                      readOnly
+                      placeholder="Age"
+                      aria-label="Age"
+                      className={`${
+                        isDobValid === null
+                          ? "border-gray-200"
+                          : isDobValid
+                          ? "border-green-400 focus:border-green-500 focus-visible:ring-green-500"
+                          : "border-red-300 focus:border-red-500 focus-visible:ring-red-500"
+                      } flex h-11 md:h-12 rounded-md border bg-white px-2 text-base text-center font-medium select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 w-14`}
+                      style={{ width: "3.25rem" }}
+                    />
+                  </div>
+                  {birthdateError && (
+                    <p className="text-sm text-red-600 mt-1">
+                      {birthdateError}
+                    </p>
+                  )}
                 </div>
 
                 <div className="grid md:grid-cols-3 gap-4">
@@ -388,7 +492,7 @@ const RegisterStudentPage = () => {
                       htmlFor="finalYearScore"
                       className="text-base font-medium text-gray-700"
                     >
-                      Final Year Score:
+                      Final Preb Score:
                     </Label>
                     <Input
                       id="finalYearScore"
@@ -473,6 +577,84 @@ const RegisterStudentPage = () => {
       </div>
 
       <Footer />
+
+      {isStudentsModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={() => setIsStudentsModalOpen(false)}
+          ></div>
+          <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-3xl mx-4">
+            <div className="flex items-center justify-between px-6 py-4 border-b">
+              <h3 className="text-lg font-semibold">Registered Students</h3>
+              <button
+                onClick={() => setIsStudentsModalOpen(false)}
+                className="text-gray-500 hover:text-gray-700"
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="p-6">
+              <div className="mb-4">
+                <input
+                  type="text"
+                  placeholder="Search by name or national ID"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full h-11 rounded-md border border-gray-300 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ef3131]"
+                />
+              </div>
+              <div className="max-h-[50vh] overflow-auto">
+                <table className="w-full text-left text-sm">
+                  <thead>
+                    <tr className="border-b bg-gray-50">
+                      <th className="py-2 px-3">Name</th>
+                      <th className="py-2 px-3">National ID</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {students
+                      .filter((s) => {
+                        const name = (s.fullName || "")
+                          .toString()
+                          .toLowerCase();
+                        const nid = (s.nationalId || "").toString();
+                        const q = searchQuery.trim().toLowerCase();
+                        if (!q) return true;
+                        return name.includes(q) || nid.includes(q);
+                      })
+                      .map((s) => (
+                        <tr key={s.id} className="border-b hover:bg-gray-50">
+                          <td className="py-2 px-3">{s.fullName || "-"}</td>
+                          <td className="py-2 px-3">{s.nationalId || "-"}</td>
+                        </tr>
+                      ))}
+                    {students.length === 0 && (
+                      <tr>
+                        <td
+                          colSpan="2"
+                          className="py-4 text-center text-gray-500"
+                        >
+                          No students yet
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div className="px-6 py-4 border-t flex justify-end">
+              <button
+                className="px-4 py-2 rounded-md bg-gray-100 hover:bg-gray-200 text-sm"
+                onClick={() => setIsStudentsModalOpen(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

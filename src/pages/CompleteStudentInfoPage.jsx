@@ -6,6 +6,7 @@ import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
 import Label from "../components/ui/Label";
 import Textarea from "../components/ui/Textarea";
+import Checkbox from "../components/ui/Checkbox";
 import {
   Card,
   CardContent,
@@ -27,6 +28,9 @@ const CompleteStudentInfoPage = () => {
     streetName: "",
     buildingNo: "",
     phoneNumber: "",
+    studentPhoneNumber: "",
+    isArabicStudy: false,
+    isLanguagesStudy: false,
     email: "",
     birthCertificate: null,
     successReport: null,
@@ -67,7 +71,7 @@ const CompleteStudentInfoPage = () => {
     let processedValue = value;
 
     // Format phone number as user types
-    if (field === "phoneNumber") {
+    if (field === "phoneNumber" || field === "studentPhoneNumber") {
       // Remove all non-digits
       const digits = value.replace(/\D/g, "");
       // Limit to 11 digits
@@ -93,22 +97,29 @@ const CompleteStudentInfoPage = () => {
 
     if (!formData.parentOccupation) errors.push("مهنة ولي الأمر مطلوبة");
     if (!formData.address) errors.push("العنوان مطلوب");
-    if (!formData.city) errors.push("المدينة مطلوبة");
+    if (!formData.city) errors.push("المحافظة مطلوبة");
     if (!formData.district) errors.push("الحي مطلوب");
     if (!formData.streetName) errors.push("اسم الشارع مطلوب");
     if (!formData.buildingNo) errors.push("رقم المبنى مطلوب");
-    if (!formData.phoneNumber) errors.push("رقم الهاتف مطلوب");
+    if (!formData.phoneNumber) errors.push("رقم جوال ولي الأمر مطلوب");
+    if (!formData.studentPhoneNumber) errors.push("رقم جوال الطالب مطلوب");
+    if (!formData.isArabicStudy && !formData.isLanguagesStudy)
+      errors.push("يجب اختيار نوع الدراسة");
     if (!formData.email) errors.push("البريد الإلكتروني مطلوب");
 
     // Validate phone number (Egyptian format - exactly 11 digits)
-    if (formData.phoneNumber) {
-      const cleanPhone = formData.phoneNumber.replace(/\D/g, "");
-      if (cleanPhone.length !== 11) {
-        errors.push("رقم الهاتف يجب أن يكون 11 رقم بالضبط");
-      } else if (!/^01\d{9}$/.test(cleanPhone)) {
-        errors.push("رقم الهاتف يجب أن يكون رقم مصري صحيح (مثال: 01012345678)");
+    const validateEgyptPhone = (num, label) => {
+      if (!num) return;
+      const clean = num.replace(/\D/g, "");
+      if (clean.length !== 11) {
+        errors.push(`${label} يجب أن يكون 11 رقم بالضبط`);
+      } else if (!/^01\d{9}$/.test(clean)) {
+        errors.push(`${label} يجب أن يكون رقم مصري صحيح (مثال: 01012345678)`);
       }
-    }
+    };
+
+    validateEgyptPhone(formData.phoneNumber, "رقم جوال ولي الأمر");
+    validateEgyptPhone(formData.studentPhoneNumber, "رقم جوال الطالب");
 
     // Validate email
     if (formData.email) {
@@ -197,6 +208,9 @@ const CompleteStudentInfoPage = () => {
         streetName: formData.streetName,
         buildingNo: formData.buildingNo,
         phoneNumber: formData.phoneNumber,
+        studentPhoneNumber: formData.studentPhoneNumber,
+        isArabicStudy: formData.isArabicStudy,
+        isLanguagesStudy: formData.isLanguagesStudy,
         email: formData.email,
       });
 
@@ -235,7 +249,7 @@ const CompleteStudentInfoPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50" dir="rtl">
       <Header />
 
       <div className="py-8 md:py-12">
@@ -243,6 +257,7 @@ const CompleteStudentInfoPage = () => {
           <Link
             to="/check-national-id"
             className="inline-flex items-center text-[#ef3131] hover:underline mb-8 font-medium"
+            dir="ltr"
           >
             <svg
               className="h-4 w-4 mr-2"
@@ -261,7 +276,7 @@ const CompleteStudentInfoPage = () => {
           </Link>
 
           <Card className="border-0 smooth-shadow">
-            <CardHeader className="text-center">
+            <CardHeader className="text-center" dir="ltr">
               <div className="w-16 h-16 bg-[#ef3131]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <svg
                   className="h-8 w-8 text-[#ef3131]"
@@ -434,7 +449,7 @@ const CompleteStudentInfoPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <Label htmlFor="city" className="text-base font-medium">
-                      المدينة *
+                      المحافظة *
                     </Label>
                     <select
                       id="city"
@@ -445,7 +460,7 @@ const CompleteStudentInfoPage = () => {
                       className="mt-2 h-12 text-lg w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#ef3131] focus:border-transparent"
                       required
                     >
-                      <option value="">اختر المدينة</option>
+                      <option value="">اختر المحافظة</option>
                       <option value="القاهرة">القاهرة</option>
                       <option value="الإسكندرية">الإسكندرية</option>
                       <option value="الجيزة">الجيزة</option>
@@ -536,7 +551,7 @@ const CompleteStudentInfoPage = () => {
                       htmlFor="phoneNumber"
                       className="text-base font-medium"
                     >
-                      رقم الهاتف *
+                      رقم الجوال (ولي الأمر) *
                     </Label>
                     <Input
                       id="phoneNumber"
@@ -553,21 +568,94 @@ const CompleteStudentInfoPage = () => {
                   </div>
 
                   <div>
-                    <Label htmlFor="email" className="text-base font-medium">
-                      البريد الإلكتروني *
+                    <Label
+                      htmlFor="studentPhoneNumber"
+                      className="text-base font-medium"
+                    >
+                      رقم الجوال (الطالب) *
                     </Label>
                     <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
+                      id="studentPhoneNumber"
+                      type="tel"
+                      value={formData.studentPhoneNumber}
                       onChange={(e) =>
-                        handleInputChange("email", e.target.value)
+                        handleInputChange("studentPhoneNumber", e.target.value)
                       }
-                      placeholder="example@example.com"
+                      placeholder="01012345678"
                       className="mt-2 h-12 text-lg"
-                      validation={{ email: true }}
+                      validation={{ phone: true }}
+                      maxLength={11}
                     />
                   </div>
+                </div>
+
+                <div className="mb-6">
+                  <div className="space-y-3">
+                    <h3 className="text-base font-medium text-gray-900">
+                      نوع الدراسة *
+                    </h3>
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-3">
+                        <input
+                          type="radio"
+                          id="isArabicStudy"
+                          name="studyType"
+                          checked={formData.isArabicStudy}
+                          onChange={() =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              isArabicStudy: true,
+                              isLanguagesStudy: false,
+                            }))
+                          }
+                          className="w-4 h-4 text-[#ef3131] bg-gray-100 border-gray-300 focus:ring-[#ef3131] focus:ring-2"
+                        />
+                        <Label
+                          htmlFor="isArabicStudy"
+                          className="text-base font-medium text-gray-700"
+                        >
+                          عربي
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <input
+                          type="radio"
+                          id="isLanguagesStudy"
+                          name="studyType"
+                          checked={formData.isLanguagesStudy}
+                          onChange={() =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              isArabicStudy: false,
+                              isLanguagesStudy: true,
+                            }))
+                          }
+                          className="w-4 h-4 text-[#ef3131] bg-gray-100 border-gray-300 focus:ring-[#ef3131] focus:ring-2"
+                        />
+                        <Label
+                          htmlFor="isLanguagesStudy"
+                          className="text-base font-medium text-gray-700"
+                        >
+                          لغات
+                        </Label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="email" className="text-base font-medium">
+                    البريد الإلكتروني *
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange("email", e.target.value)}
+                    placeholder="example@example.com"
+                    className="mt-2 h-12 text-lg"
+                    validation={{ email: true }}
+                  />
                 </div>
 
                 {/* File Upload Section */}

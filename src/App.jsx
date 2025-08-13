@@ -12,12 +12,14 @@ import ExamCompletedPage from "./pages/ExamCompletedPage";
 import ContactPage from "./pages/ContactPage";
 import AdminLoginPage from "./pages/AdminLoginPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
-
 import SuperAdminDashboardPage from "./pages/SuperAdminDashboardPage";
 import TeacherLoginPage from "./pages/TeacherLoginPage";
 import RegisterStudentPage from "./pages/RegisterStudentPage";
 import ApplyPage from "./pages/ApplyPage";
 import ExcelUploadPage from "./pages/ExcelUploadPage";
+import StaffLoginPage from "./pages/StaffLoginPage";
+import StaffDashboardPage from "./pages/StaffDashboardPage";
+import StaffEditStudentPage from "./pages/StaffEditStudentPage";
 import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
@@ -30,6 +32,7 @@ function App() {
     if (lastClearDate !== today) {
       localStorage.removeItem("adminToken");
       localStorage.removeItem("teacherToken");
+      localStorage.removeItem("staffToken");
       localStorage.setItem("lastClearDate", today);
     }
 
@@ -77,6 +80,12 @@ function App() {
               element={<RegisterStudentPage />}
             />
             <Route path="/admin/excel-upload" element={<ExcelUploadPage />} />
+            <Route path="/staff/login" element={<StaffLoginPage />} />
+            <Route path="/staff/dashboard" element={<StaffDashboardPage />} />
+            <Route
+              path="/staff/edit-student"
+              element={<StaffEditStudentPage />}
+            />
           </Routes>
         </div>
       </Router>

@@ -1505,3 +1505,4 @@ M:\admission-system-Saif11-8\server\SchoolAdmission\obj\Debug\net8.0\refint\Scho
 M:\admission-system-Saif11-8\server\SchoolAdmission\obj\Debug\net8.0\SchoolAdmission.pdb
 M:\admission-system-Saif11-8\server\SchoolAdmission\obj\Debug\net8.0\SchoolAdmission.genruntimeconfig.cache
 M:\admission-system-Saif11-8\server\SchoolAdmission\obj\Debug\net8.0\ref\SchoolAdmission.dll
+M:\admission-system-Saif11-8\server\SchoolAdmission\obj\Debug\net8.0\SchoolAdmission.sourcelink.json

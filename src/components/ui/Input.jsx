@@ -23,6 +23,7 @@ const Input = ({
   validation = {},
   showValidation = false,
   onValidationChange,
+  hideErrorMessage = false,
   ...props
 }) => {
   const [error, setError] = useState("");
@@ -149,7 +150,7 @@ const Input = ({
         max={max}
         {...props}
       />
-      {error && (showValidation || isTouched) && (
+      {!hideErrorMessage && error && (showValidation || isTouched) && (
         <p className="text-sm text-red-600 mt-1">{error}</p>
       )}
     </div>
