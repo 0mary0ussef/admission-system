@@ -22,6 +22,7 @@ import {
 } from "../components/ui/Table";
 import { useStudents } from "../hooks/useStudents";
 import { useAuth } from "../context/AuthContext";
+import Pagination from "../components/ui/Pagination";
 
 const AdminDashboardPage = () => {
   const navigate = useNavigate();
@@ -49,6 +50,12 @@ const AdminDashboardPage = () => {
     isLoading,
     error,
     isSubmitting,
+    currentPage,
+    pageSize,
+    totalPages,
+    totalStudents,
+    fetchStudentsForPage,
+    changePageSize,
   } = useStudents();
 
   const [showInterviewConfirmation, setShowInterviewConfirmation] =
@@ -656,6 +663,17 @@ const AdminDashboardPage = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Pagination */}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={(page) => fetchStudentsForPage(page)}
+          onPageSizeChange={changePageSize}
+          pageSize={pageSize}
+          totalItems={totalStudents}
+          isLoading={isLoading}
+        />
       </div>
 
       {/* Interview Score Confirmation Modal */}

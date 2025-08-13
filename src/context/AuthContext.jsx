@@ -15,16 +15,21 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [adminToken, setAdminToken] = useState(null);
   const [teacherToken, setTeacherToken] = useState(null);
+  const [staffAdminToken, setStaffAdminToken] = useState(null);
 
   useEffect(() => {
     const storedAdminToken = localStorage.getItem("adminToken");
     const storedTeacherToken = localStorage.getItem("teacherToken");
+    const storedStaffAdminToken = localStorage.getItem("staffAdminToken");
 
     if (storedAdminToken) {
       setAdminToken(storedAdminToken);
     }
     if (storedTeacherToken) {
       setTeacherToken(storedTeacherToken);
+    }
+    if (storedStaffAdminToken) {
+      setStaffAdminToken(storedStaffAdminToken);
     }
   }, []);
 
@@ -38,6 +43,11 @@ export const AuthProvider = ({ children }) => {
     setTeacherToken(token);
   };
 
+  const loginStaffAdmin = (token) => {
+    localStorage.setItem("staffAdminToken", token);
+    setStaffAdminToken(token);
+  };
+
   const logoutAdmin = () => {
     localStorage.removeItem("adminToken");
     setAdminToken(null);
@@ -48,15 +58,24 @@ export const AuthProvider = ({ children }) => {
     setTeacherToken(null);
   };
 
+  const logoutStaffAdmin = () => {
+    localStorage.removeItem("staffAdminToken");
+    setStaffAdminToken(null);
+  };
+
   const value = {
     adminToken,
     teacherToken,
+    staffAdminToken,
     loginAdmin,
     loginTeacher,
+    loginStaffAdmin,
     logoutAdmin,
     logoutTeacher,
+    logoutStaffAdmin,
     isAdminAuthenticated: !!adminToken,
     isTeacherAuthenticated: !!teacherToken,
+    isStaffAdminAuthenticated: !!staffAdminToken,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

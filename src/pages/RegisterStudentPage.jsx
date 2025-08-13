@@ -190,6 +190,29 @@ const RegisterStudentPage = () => {
       }
     }
 
+    // Validate score ranges
+    const mathScore = parseFloat(formData.mathScore);
+    const englishScore = parseFloat(formData.englishScore);
+    const finalYearScore = parseFloat(formData.finalYearScore);
+
+    if (isNaN(mathScore) || mathScore < 0 || mathScore > 60) {
+      setError("Math score must be between 0 and 60");
+      setIsLoading(false);
+      return;
+    }
+
+    if (isNaN(englishScore) || englishScore < 0 || englishScore > 40) {
+      setError("English score must be between 0 and 40");
+      setIsLoading(false);
+      return;
+    }
+
+    if (isNaN(finalYearScore) || finalYearScore < 0 || finalYearScore > 280) {
+      setError("Final Prep score must be between 0 and 280");
+      setIsLoading(false);
+      return;
+    }
+
     // Scroll to top to show any validation messages
     window.scrollTo({ top: 0, behavior: "smooth" });
 
@@ -455,14 +478,23 @@ const RegisterStudentPage = () => {
                       type="number"
                       min="0"
                       max="60"
+                      step="0.1"
                       value={formData.mathScore}
-                      onChange={(e) =>
-                        handleInputChange("mathScore", e.target.value)
-                      }
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        // Allow empty string or valid decimal numbers
+                        if (
+                          value === "" ||
+                          (parseFloat(value) >= 0 && parseFloat(value) <= 60)
+                        ) {
+                          handleInputChange("mathScore", value);
+                        }
+                      }}
                       placeholder="Enter Math score (0-60)"
                       className="mt-2 h-11 md:h-12 text-base"
                       required
                     />
+                    
                   </div>
 
                   <div>
@@ -477,14 +509,23 @@ const RegisterStudentPage = () => {
                       type="number"
                       min="0"
                       max="40"
+                      step="0.1"
                       value={formData.englishScore}
-                      onChange={(e) =>
-                        handleInputChange("englishScore", e.target.value)
-                      }
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        // Allow empty string or valid decimal numbers
+                        if (
+                          value === "" ||
+                          (parseFloat(value) >= 0 && parseFloat(value) <= 40)
+                        ) {
+                          handleInputChange("englishScore", value);
+                        }
+                      }}
                       placeholder="Enter English score (0-40)"
                       className="mt-2 h-11 md:h-12 text-base"
                       required
                     />
+                    
                   </div>
 
                   <div>
@@ -492,21 +533,30 @@ const RegisterStudentPage = () => {
                       htmlFor="finalYearScore"
                       className="text-base font-medium text-gray-700"
                     >
-                      Final Preb Score:
+                      Final Prep Score:
                     </Label>
                     <Input
                       id="finalYearScore"
                       type="number"
                       min="0"
                       max="280"
+                      step="0.1"
                       value={formData.finalYearScore}
-                      onChange={(e) =>
-                        handleInputChange("finalYearScore", e.target.value)
-                      }
-                      placeholder="Enter Final Year score (0-280)"
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        // Allow empty string or valid decimal numbers
+                        if (
+                          value === "" ||
+                          (parseFloat(value) >= 0 && parseFloat(value) <= 280)
+                        ) {
+                          handleInputChange("finalYearScore", value);
+                        }
+                      }}
+                      placeholder="Enter Final Prep score (0-280)"
                       className="mt-2 h-11 md:h-12 text-base"
                       required
                     />
+                    
                   </div>
                 </div>
 
@@ -543,16 +593,23 @@ const RegisterStudentPage = () => {
                       max="100"
                       step="0.01"
                       value={formData.ministryExamPercentage}
-                      onChange={(e) =>
-                        handleInputChange(
-                          "ministryExamPercentage",
-                          e.target.value
-                        )
-                      }
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        // Allow empty string or valid decimal numbers
+                        if (
+                          value === "" ||
+                          (parseFloat(value) >= 0 && parseFloat(value) <= 100)
+                        ) {
+                          handleInputChange("ministryExamPercentage", value);
+                        }
+                      }}
                       placeholder="Enter Ministry Exam percentage (0-100)"
                       className="mt-2 h-11 md:h-12 text-base"
                       required={isAcceptanceLetterReceived}
                     />
+                    <p className="text-sm text-gray-500 mt-1">
+                      Percentage range: 0.00 to 100.00
+                    </p>
                   </div>
                 )}
 

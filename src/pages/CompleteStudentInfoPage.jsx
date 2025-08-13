@@ -608,7 +608,7 @@ const CompleteStudentInfoPage = () => {
                               isLanguagesStudy: false,
                             }))
                           }
-                          className="w-4 h-4 text-[#ef3131] bg-gray-100 border-gray-300 focus:ring-[#ef3131] focus:ring-2"
+                          className="w-4 h-4 text-[#ef3131] bg-gray-100 border-gray-300 "
                         />
                         <Label
                           htmlFor="isArabicStudy"
@@ -630,7 +630,7 @@ const CompleteStudentInfoPage = () => {
                               isLanguagesStudy: true,
                             }))
                           }
-                          className="w-4 h-4 text-[#ef3131] bg-gray-100 border-gray-300 focus:ring-[#ef3131] focus:ring-2"
+                          className="w-4 h-4 text-[#ef3131] bg-gray-100 border-gray-300 "
                         />
                         <Label
                           htmlFor="isLanguagesStudy"

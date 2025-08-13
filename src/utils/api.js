@@ -25,11 +25,14 @@ api.interceptors.request.use(
     const adminToken = localStorage.getItem("adminToken");
     const teacherToken = localStorage.getItem("teacherToken");
     const studentToken = localStorage.getItem("studentToken");
+    const staffAdminToken = localStorage.getItem("staffAdminToken");
 
     if (adminToken) {
       config.headers.Authorization = `Bearer ${adminToken}`;
     } else if (teacherToken) {
       config.headers.Authorization = `Bearer ${teacherToken}`;
+    } else if (staffAdminToken) {
+      config.headers.Authorization = `Bearer ${staffAdminToken}`;
     } else if (studentToken && config.url && config.url.includes("/Student/")) {
       // Add student token for student API calls
       config.headers.Authorization = `Bearer ${studentToken}`;
@@ -51,6 +54,7 @@ api.interceptors.response.use(
       localStorage.removeItem("adminToken");
       localStorage.removeItem("teacherToken");
       localStorage.removeItem("studentToken");
+      localStorage.removeItem("staffAdminToken");
       localStorage.removeItem("studentNationalId");
       localStorage.removeItem("examStudentData");
 
@@ -107,13 +111,15 @@ export const studentAPI = {
 
 // Admin API
 export const adminAPI = {
-  getAllStudents: () => api.get("/Admin/students"),
+  getAllStudents: (page = 1, pageSize = 10) => api.get(`/Admin/students?page=${page}&pageSize=${pageSize}`),
   filterStudents: (filters) =>
     api.get("/Admin/students/filter", { params: filters }),
   setInterviewScore: (studentId, score) =>
     api.post(`/Admin/student/${studentId}/my-interview-score`, score),
   updateStudentStatus: (studentId, status) =>
     api.put(`/Admin/student/${studentId}/status`, { Status: status }),
+  updateStudentInfo: (studentId, studentData) =>
+    api.put(`/Admin/student/${studentId}/update-info`, studentData),
 };
 
 // Exam API

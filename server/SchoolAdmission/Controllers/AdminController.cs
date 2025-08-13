@@ -27,7 +27,7 @@ public class AdminController : ControllerBase
     }
 
     [HttpGet("students")]
-    public async Task<IActionResult> GetAllStudents()
+    public async Task<IActionResult> GetAllStudents([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
         try
         {
@@ -40,7 +40,8 @@ public class AdminController : ControllerBase
                 return Unauthorized("Admin not found or not authorized. Please log in again.");
 
             if (adminAccount.AccountType.AccountTypeName != "Admin" && 
-                adminAccount.AccountType.AccountTypeName != "SuperAdmin")
+                adminAccount.AccountType.AccountTypeName != "SuperAdmin" &&
+                adminAccount.AccountType.AccountTypeName != "StaffAdmin")
                 return Forbid("Only admins can view student information.");
 
             var students = await db.Accounts
@@ -52,18 +53,46 @@ public class AdminController : ControllerBase
             if (students.Count == 0)
                 return NotFound("No students found in the system.");
 
+            // Calculate pagination
+            var totalStudents = students.Count;
+            var totalPages = (int)Math.Ceiling((double)totalStudents / pageSize);
+            page = Math.Max(1, Math.Min(page, totalPages)); // Ensure page is within valid range
+            var skip = (page - 1) * pageSize;
+            var paginatedStudents = students.Skip(skip).Take(pageSize).ToList();
+
+            List<dynamic> result;
             if (adminAccount.AccountType.AccountTypeName == "Admin")
             {
-                var result = await GetAdminView(students, adminAccount.Id);
-                return Ok(result);
+                result = await GetAdminView(paginatedStudents, adminAccount.Id);
             }
             else if (adminAccount.AccountType.AccountTypeName == "SuperAdmin")
             {
-                var result = await GetSuperAdminView(students);
-                return Ok(result);
+                result = await GetSuperAdminView(paginatedStudents);
+            }
+            else if (adminAccount.AccountType.AccountTypeName == "StaffAdmin")
+            {
+                result = await GetStaffAdminView(paginatedStudents);
+            }
+            else
+            {
+                return Forbid("You do not have permission to view student information.");
             }
 
-            return Forbid("You do not have permission to view student information.");
+            var response = new
+            {
+                Students = result,
+                Pagination = new
+                {
+                    CurrentPage = page,
+                    PageSize = pageSize,
+                    TotalPages = totalPages,
+                    TotalStudents = totalStudents,
+                    HasNextPage = page < totalPages,
+                    HasPreviousPage = page > 1
+                }
+            };
+
+            return Ok(response);
         }
         catch (Exception ex)
         {
@@ -115,6 +144,64 @@ public class AdminController : ControllerBase
     }
 
     private async Task<List<dynamic>> GetSuperAdminView(List<Account> students)
+    {
+        var result = new List<dynamic>();
+        
+        foreach (var s in students)
+        {
+            var admissionProfile = s.AdmissionProfile;
+            
+            // Get exam results for this student
+            var examResults = await db.StudentExamResults
+                .FirstOrDefaultAsync(ser => ser.AccountId == s.Id);
+            
+            // Get all interview scores for this student
+            var interviewScores = await db.InterviewScores
+                .Where(i => i.AccountId == s.Id)
+                .Select(i => new { 
+                    Admin = db.Accounts.Where(a => a.Id == i.InterviewerId).Select(a => a.FullNameEn).FirstOrDefault() ?? "Unknown Admin", 
+                    i.Score 
+                })
+                .ToListAsync();
+
+            // Calculate average interview score safely
+            double averageInterviewScore = 0;
+            if (interviewScores.Count > 0)
+            {
+                averageInterviewScore = (double)(interviewScores.Sum(i => i.Score) / interviewScores.Count);
+            }
+            
+            var examTotal = GetExamTotal(examResults);
+            var interviewPercentage = examTotal + averageInterviewScore; 
+            
+            result.Add(new {
+                s.Id,
+                FullName = s.FullNameEn,
+                PhoneNumber = admissionProfile?.PhoneNumber ?? "",
+                s.NationalId,
+                s.Email,
+                MathScore = admissionProfile?.MathScore ?? 0,
+                EnglishScore = admissionProfile?.EnglishScore ?? 0,
+                FinalYearScore = admissionProfile?.ThirdPrepScore ?? 0,
+                MinistryExamPercentage = admissionProfile?.MinistryExamPercentage ?? 0,
+                City = admissionProfile?.City ?? "",
+                District = admissionProfile?.District ?? "",
+                Status = admissionProfile?.Status.ToString() ?? "Pending",
+                ExamMathScore = examResults?.ExamMathScore ?? 0,
+                ExamEnglishScore = examResults?.ExamEnglishScore ?? 0,
+                ExamSoftwareScore = examResults?.ExamSoftwareScore ?? 0,
+                ExamArabicScore = examResults?.ExamArabicScore ?? 0,
+                ExamTotal = examTotal,
+                InterviewScores = interviewScores,
+                TotalScore = examTotal,
+                InterviewPercentage = interviewPercentage
+            });
+        }
+        
+        return result;
+    }
+
+    private async Task<List<dynamic>> GetStaffAdminView(List<Account> students)
     {
         var result = new List<dynamic>();
         
@@ -337,6 +424,116 @@ public class AdminController : ControllerBase
             Console.WriteLine($"Error in UpdateStudentStatus: {ex.Message}");
             Console.WriteLine($"Stack trace: {ex.StackTrace}");
             return StatusCode(500, $"An error occurred while updating student status: {ex.Message}");
+        }
+    }
+
+    [HttpPut("student/{studentId}/update-info")]
+    public async Task<IActionResult> UpdateStudentInfo(long studentId, [FromBody] UpdateStudentInfoDTO dto)
+    {
+        try
+        {
+            var userEmail = GetCurrentAdminEmail();
+            var adminAccount = await db.Accounts
+                .Include(a => a.AccountType)
+                .FirstOrDefaultAsync(a => a.Email == userEmail);
+                
+            if (adminAccount == null)
+                return Unauthorized("Admin not found or not authorized. Please log in again.");
+
+            // Only StaffAdmin can update student information
+            if (adminAccount.AccountType.AccountTypeName != "StaffAdmin")
+                return Forbid("Only StaffAdmin users can update student information.");
+
+            var student = await db.Accounts
+                .Include(a => a.AdmissionProfile)
+                .FirstOrDefaultAsync(s => s.Id == studentId);
+                
+            if (student == null)
+                return NotFound($"Student with ID {studentId} not found.");
+
+            // Update basic student information
+            if (!string.IsNullOrEmpty(dto.StudentName))
+                student.FullNameEn = dto.StudentName;
+
+            if (!string.IsNullOrEmpty(dto.NationalId))
+                student.NationalId = dto.NationalId;
+
+            if (!string.IsNullOrEmpty(dto.Email))
+                student.Email = dto.Email;
+
+            // Update or create admission profile
+            if (student.AdmissionProfile == null)
+            {
+                student.AdmissionProfile = new AdmissionProfile();
+            }
+
+            var profile = student.AdmissionProfile;
+
+            // Update registration information
+            if (dto.MathScore.HasValue)
+                profile.MathScore = dto.MathScore.Value;
+
+            if (dto.EnglishScore.HasValue)
+                profile.EnglishScore = dto.EnglishScore.Value;
+
+            if (dto.FinalYearScore.HasValue)
+                profile.ThirdPrepScore = dto.FinalYearScore.Value;
+
+            if (dto.MinistryExamPercentage.HasValue)
+                profile.MinistryExamPercentage = dto.MinistryExamPercentage.Value;
+
+            if (!string.IsNullOrEmpty(dto.DateOfBirth))
+                profile.DateOfBirth = DateTime.Parse(dto.DateOfBirth);
+
+            // Update complete information
+            if (!string.IsNullOrEmpty(dto.ParentOccupation))
+                profile.ParentOccupation = dto.ParentOccupation;
+
+            if (!string.IsNullOrEmpty(dto.Address))
+                profile.Address = dto.Address;
+
+            if (!string.IsNullOrEmpty(dto.City))
+                profile.City = dto.City;
+
+            if (!string.IsNullOrEmpty(dto.District))
+                profile.District = dto.District;
+
+            if (!string.IsNullOrEmpty(dto.StreetName))
+                profile.StreetName = dto.StreetName;
+
+            if (!string.IsNullOrEmpty(dto.BuildingNo))
+                profile.BuildingNo = dto.BuildingNo;
+
+            if (!string.IsNullOrEmpty(dto.PhoneNumber))
+                profile.PhoneNumber = dto.PhoneNumber;
+
+            if (!string.IsNullOrEmpty(dto.StudentPhoneNumber))
+                profile.StudentPhoneNumber = dto.StudentPhoneNumber;
+
+            // Update study type
+            if (dto.IsArabicStudy.HasValue && dto.IsArabicStudy.Value)
+            {
+                profile.IsArabicStudy = true;
+                profile.IsLanguagesStudy = false;
+            }
+            else if (dto.IsLanguagesStudy.HasValue && dto.IsLanguagesStudy.Value)
+            {
+                profile.IsArabicStudy = false;
+                profile.IsLanguagesStudy = true;
+            }
+
+            await db.SaveChangesAsync();
+            
+            return Ok(new { 
+                Success = true, 
+                Message = "Student information updated successfully.",
+                StudentId = studentId,
+                StudentName = student.FullNameEn
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"An error occurred while updating student information: {ex.Message}");
         }
     }
 }

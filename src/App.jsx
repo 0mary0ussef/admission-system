@@ -13,13 +13,12 @@ import ContactPage from "./pages/ContactPage";
 import AdminLoginPage from "./pages/AdminLoginPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import SuperAdminDashboardPage from "./pages/SuperAdminDashboardPage";
+import StaffAdminDashboardPage from "./pages/StaffAdminDashboardPage";
 import TeacherLoginPage from "./pages/TeacherLoginPage";
 import RegisterStudentPage from "./pages/RegisterStudentPage";
 import ApplyPage from "./pages/ApplyPage";
 import ExcelUploadPage from "./pages/ExcelUploadPage";
-import StaffLoginPage from "./pages/StaffLoginPage";
-import StaffDashboardPage from "./pages/StaffDashboardPage";
-import StaffEditStudentPage from "./pages/StaffEditStudentPage";
+
 import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
@@ -32,7 +31,7 @@ function App() {
     if (lastClearDate !== today) {
       localStorage.removeItem("adminToken");
       localStorage.removeItem("teacherToken");
-      localStorage.removeItem("staffToken");
+      localStorage.removeItem("staffAdminToken");
       localStorage.setItem("lastClearDate", today);
     }
 
@@ -74,18 +73,16 @@ function App() {
               path="/super-admin/dashboard"
               element={<SuperAdminDashboardPage />}
             />
+            <Route
+              path="/staff-admin/dashboard"
+              element={<StaffAdminDashboardPage />}
+            />
             <Route path="/teacher/login" element={<TeacherLoginPage />} />
             <Route
               path="/teacher/register-student"
               element={<RegisterStudentPage />}
             />
             <Route path="/admin/excel-upload" element={<ExcelUploadPage />} />
-            <Route path="/staff/login" element={<StaffLoginPage />} />
-            <Route path="/staff/dashboard" element={<StaffDashboardPage />} />
-            <Route
-              path="/staff/edit-student"
-              element={<StaffEditStudentPage />}
-            />
           </Routes>
         </div>
       </Router>

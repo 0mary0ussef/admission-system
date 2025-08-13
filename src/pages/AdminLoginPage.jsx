@@ -23,7 +23,7 @@ const AdminLoginPage = () => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { loginAdmin } = useAuth();
+  const { loginAdmin, loginStaffAdmin } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -33,12 +33,18 @@ const AdminLoginPage = () => {
     try {
       const response = await authAPI.adminLogin({ email, password });
 
-      // Store the token and update auth context
-      loginAdmin(response.data.token);
+      // Store the token and update auth context based on role
+      if (response.data.role.toLowerCase() === "staffadmin") {
+        loginStaffAdmin(response.data.token);
+      } else {
+        loginAdmin(response.data.token);
+      }
 
       // Navigate based on admin role
       if (response.data.role.toLowerCase() === "superadmin") {
         navigate("/super-admin/dashboard");
+      } else if (response.data.role.toLowerCase() === "staffadmin") {
+        navigate("/staff-admin/dashboard");
       } else {
         navigate("/admin/dashboard");
       }

@@ -23,33 +23,61 @@ export const useStudents = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentAdminRole, setCurrentAdminRole] = useState("");
   const [successMessage, setSuccessMessage] = useState(null);
-  
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalStudents, setTotalStudents] = useState(0);
+
   const clearError = () => setError("");
   const clearSuccessMessage = () => setSuccessMessage(null);
 
-  // Fetch students data
-  const fetchStudents = async () => {
+  // Fetch students data with pagination
+  const fetchStudents = async (page = 1, size = 10) => {
     try {
       setIsLoading(true);
       setError("");
-      const response = await adminAPI.getAllStudents();
+      const response = await adminAPI.getAllStudents(page, size);
 
-      // Determine admin role based on response structure
-      if (response.data && response.data.length > 0) {
-        const firstStudent = response.data[0];
-        if (
-          firstStudent.hasOwnProperty("interviewScores") &&
-          Array.isArray(firstStudent.interviewScores)
-        ) {
-          // This is super admin view
-          setCurrentAdminRole("superadmin");
-        } else {
-          // This is regular admin view
-          setCurrentAdminRole("admin");
+      // Handle paginated response
+      if (response.data && response.data.Students) {
+        const studentsData = response.data.Students;
+        const paginationData = response.data.Pagination;
+
+        setStudents(studentsData);
+        setCurrentPage(paginationData.CurrentPage);
+        setPageSize(paginationData.PageSize);
+        setTotalPages(paginationData.TotalPages);
+        setTotalStudents(paginationData.TotalStudents);
+
+        // Determine admin role based on response structure
+        if (studentsData.length > 0) {
+          const firstStudent = studentsData[0];
+          if (
+            firstStudent.hasOwnProperty("interviewScores") &&
+            Array.isArray(firstStudent.interviewScores)
+          ) {
+            // This is super admin view
+            setCurrentAdminRole("superadmin");
+          } else if (
+            firstStudent.hasOwnProperty("phoneNumber") ||
+            firstStudent.hasOwnProperty("city")
+          ) {
+            // This is staff admin view
+            setCurrentAdminRole("staffadmin");
+          } else {
+            // This is regular admin view
+            setCurrentAdminRole("admin");
+          }
         }
+      } else {
+        // Fallback for non-paginated response (backward compatibility)
+        setStudents(response.data || []);
+        setCurrentPage(1);
+        setTotalPages(1);
+        setTotalStudents(response.data?.length || 0);
       }
-
-      setStudents(response.data);
     } catch (err) {
       console.error("Error fetching students:", err);
       setError(err.response?.data || "Failed to fetch students");
@@ -58,8 +86,21 @@ export const useStudents = () => {
     }
   };
 
+  // Fetch students for a specific page
+  const fetchStudentsForPage = (page) => {
+    setCurrentPage(page);
+    fetchStudents(page, pageSize);
+  };
+
+  // Change page size
+  const changePageSize = (newPageSize) => {
+    setPageSize(newPageSize);
+    setCurrentPage(1); // Reset to first page when changing page size
+    fetchStudents(1, newPageSize);
+  };
+
   useEffect(() => {
-    fetchStudents();
+    fetchStudents(currentPage, pageSize);
   }, []);
 
   // Calculate percentage for a student
@@ -172,7 +213,7 @@ export const useStudents = () => {
       setIsSubmitting(true);
       setError(null); // Clear any previous errors
       setSuccessMessage(null); // Clear any previous success messages
-      
+
       const response = await adminAPI.updateStudentStatus(studentId, status);
       console.log("Status update response:", response);
 
@@ -182,10 +223,10 @@ export const useStudents = () => {
           student.id === studentId ? { ...student, status } : student
         )
       );
-      
+
       // Set success message
       setSuccessMessage(`Student status updated successfully to ${status}`);
-      
+
       // Clear success message after 3 seconds
       setTimeout(() => {
         setSuccessMessage(null);
@@ -200,7 +241,7 @@ export const useStudents = () => {
   };
 
   const stats = {
-    totalStudents: students.length,
+    totalStudents: totalStudents,
     withAcceptanceLetter: students.filter((s) => s.ministryExamPercentage >= 50)
       .length,
     interviewed: students.filter((s) => {
@@ -314,5 +355,11 @@ export const useStudents = () => {
     currentAdminRole,
     clearError,
     clearSuccessMessage,
+    currentPage,
+    pageSize,
+    totalPages,
+    totalStudents,
+    fetchStudentsForPage,
+    changePageSize,
   };
 };

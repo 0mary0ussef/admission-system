@@ -58,9 +58,10 @@ public class AuthController : ControllerBase
         if (login == null || !BCrypt.Net.BCrypt.Verify(admin.Password, login.PasswordHash))
             return BadRequest("Invalid email or password");
 
-        // Check if it's an admin or superadmin account
+        // Check if it's an admin, superadmin, or staffadmin account
         if (login.Account.AccountType.AccountTypeName != "Admin" && 
-            login.Account.AccountType.AccountTypeName != "SuperAdmin")
+            login.Account.AccountType.AccountTypeName != "SuperAdmin" &&
+            login.Account.AccountType.AccountTypeName != "StaffAdmin")
             return BadRequest("Invalid account type");
 
         var token = CreateToken(login.Account.Email, login.Account.AccountType.AccountTypeName);
@@ -198,6 +199,50 @@ public class AuthController : ControllerBase
         await db.SaveChangesAsync();
 
         return Ok(new { message = "SuperAdmin account created successfully", accountId = account.Id });
+    }
+
+    [HttpPost("create-staffadmin")]
+    public async Task<IActionResult> CreateStaffAdmin([FromBody] CreateStaffAdminDTO dto)
+    {
+        if (string.IsNullOrEmpty(dto.Email) || string.IsNullOrEmpty(dto.Password))
+            return BadRequest("Email and password are required");
+
+        // Check if email already exists
+        if (await db.Accounts.AnyAsync(a => a.Email == dto.Email))
+            return BadRequest("Email already exists");
+
+        // Get StaffAdmin AccountType
+        var staffAdminAccountType = await db.AccountTypes.FirstOrDefaultAsync(at => at.AccountTypeName == "StaffAdmin");
+        if (staffAdminAccountType == null)
+            return BadRequest("StaffAdmin account type not found");
+
+        // Create Account
+        var account = new Account
+        {
+            NationalId = GenerateRandomNationalId(), // Generate random 14-digit number
+            Email = dto.Email,
+            FullNameEn = dto.FullNameEn,
+            FullNameAr = dto.FullNameAr,
+            AccountTypeId = staffAdminAccountType.Id,
+            IsActive = true,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password)
+        };
+
+        db.Accounts.Add(account);
+        await db.SaveChangesAsync();
+
+        // Create Login
+        var login = new Login
+        {
+            AccountId = account.Id,
+            Email = dto.Email,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password)
+        };
+
+        db.Logins.Add(login);
+        await db.SaveChangesAsync();
+
+        return Ok(new { message = "StaffAdmin account created successfully", accountId = account.Id });
     }
 
     private string CreateToken(string email, string role)
