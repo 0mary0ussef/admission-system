@@ -1,0 +1,101 @@
+{
+  "Files": [
+    {
+      "Id": "D:\\AdmissionProjects\\Test\\Base\\FourthSuccessBaseExam(Math,MathAR)\\admission-system-omar\\server\\SchoolAdmission\\wwwroot\\uploads\\documents\\00000000000000_birthcertificate_20250804220908.jpg",
+      "PackagePath": "staticwebassets\\uploads\\documents\\00000000000000_birthcertificate_20250804220908.jpg"
+    },
+    {
+      "Id": "D:\\AdmissionProjects\\Test\\Base\\FourthSuccessBaseExam(Math,MathAR)\\admission-system-omar\\server\\SchoolAdmission\\wwwroot\\uploads\\documents\\00000000000000_preferencessheet_20250804220908.jpg",
+      "PackagePath": "staticwebassets\\uploads\\documents\\00000000000000_preferencessheet_20250804220908.jpg"
+    },
+    {
+      "Id": "D:\\AdmissionProjects\\Test\\Base\\FourthSuccessBaseExam(Math,MathAR)\\admission-system-omar\\server\\SchoolAdmission\\wwwroot\\uploads\\documents\\00000000000000_successreport_20250804220908.jpg",
+      "PackagePath": "staticwebassets\\uploads\\documents\\00000000000000_successreport_20250804220908.jpg"
+    },
+    {
+      "Id": "D:\\AdmissionProjects\\Test\\Base\\FourthSuccessBaseExam(Math,MathAR)\\admission-system-omar\\server\\SchoolAdmission\\wwwroot\\uploads\\documents\\00000000000000_tuitionfeereceipt_20250804220908.jpg",
+      "PackagePath": "staticwebassets\\uploads\\documents\\00000000000000_tuitionfeereceipt_20250804220908.jpg"
+    },
+    {
+      "Id": "D:\\AdmissionProjects\\Test\\Base\\FourthSuccessBaseExam(Math,MathAR)\\admission-system-omar\\server\\SchoolAdmission\\wwwroot\\uploads\\documents\\11111111111111_birthcertificate_20250729065459.jpg",
+      "PackagePath": "staticwebassets\\uploads\\documents\\11111111111111_birthcertificate_20250729065459.jpg"
+    },
+    {
+      "Id": "D:\\AdmissionProjects\\Test\\Base\\FourthSuccessBaseExam(Math,MathAR)\\admission-system-omar\\server\\SchoolAdmission\\wwwroot\\uploads\\documents\\11111111111111_birthcertificate_20250804233337.jpg",
+      "PackagePath": "staticwebassets\\uploads\\documents\\11111111111111_birthcertificate_20250804233337.jpg"
+    },
+    {
+      "Id": "D:\\AdmissionProjects\\Test\\Base\\FourthSuccessBaseExam(Math,MathAR)\\admission-system-omar\\server\\SchoolAdmission\\wwwroot\\uploads\\documents\\11111111111111_birthcertificate_20250805092546.jpg",
+      "PackagePath": "staticwebassets\\uploads\\documents\\11111111111111_birthcertificate_20250805092546.jpg"
+    },
+    {
+      "Id": "D:\\AdmissionProjects\\Test\\Base\\FourthSuccessBaseExam(Math,MathAR)\\admission-system-omar\\server\\SchoolAdmission\\wwwroot\\uploads\\documents\\11111111111111_preferencessheet_20250729065459.jpg",
+      "PackagePath": "staticwebassets\\uploads\\documents\\11111111111111_preferencessheet_20250729065459.jpg"
+    },
+    {
+      "Id": "D:\\AdmissionProjects\\Test\\Base\\FourthSuccessBaseExam(Math,MathAR)\\admission-system-omar\\server\\SchoolAdmission\\wwwroot\\uploads\\documents\\11111111111111_preferencessheet_20250804233337.jpg",
+      "PackagePath": "staticwebassets\\uploads\\documents\\11111111111111_preferencessheet_20250804233337.jpg"
+    },
+    {
+      "Id": "D:\\AdmissionProjects\\Test\\Base\\FourthSuccessBaseExam(Math,MathAR)\\admission-system-omar\\server\\SchoolAdmission\\wwwroot\\uploads\\documents\\11111111111111_preferencessheet_20250805092546.jpg",
+      "PackagePath": "staticwebassets\\uploads\\documents\\11111111111111_preferencessheet_20250805092546.jpg"
+    },
+    {
+      "Id": "D:\\AdmissionProjects\\Test\\Base\\FourthSuccessBaseExam(Math,MathAR)\\admission-system-omar\\server\\SchoolAdmission\\wwwroot\\uploads\\documents\\11111111111111_successreport_20250729065459.jpg",
+      "PackagePath": "staticwebassets\\uploads\\documents\\11111111111111_successreport_20250729065459.jpg"
+    },
+    {
+      "Id": "D:\\AdmissionProjects\\Test\\Base\\FourthSuccessBaseExam(Math,MathAR)\\admission-system-omar\\server\\SchoolAdmission\\wwwroot\\uploads\\documents\\11111111111111_successreport_20250804233337.jpg",
+      "PackagePath": "staticwebassets\\uploads\\documents\\11111111111111_successreport_20250804233337.jpg"
+    },
+    {
+      "Id": "D:\\AdmissionProjects\\Test\\Base\\FourthSuccessBaseExam(Math,MathAR)\\admission-system-omar\\server\\SchoolAdmission\\wwwroot\\uploads\\documents\\11111111111111_successreport_20250805092546.jpg",
+      "PackagePath": "staticwebassets\\uploads\\documents\\11111111111111_successreport_20250805092546.jpg"
+    },
+    {
+      "Id": "D:\\AdmissionProjects\\Test\\Base\\FourthSuccessBaseExam(Math,MathAR)\\admission-system-omar\\server\\SchoolAdmission\\wwwroot\\uploads\\documents\\11111111111111_tuitionfeereceipt_20250729065459.jpg",
+      "PackagePath": "staticwebassets\\uploads\\documents\\11111111111111_tuitionfeereceipt_20250729065459.jpg"
+    },
+    {
+      "Id": "D:\\AdmissionProjects\\Test\\Base\\FourthSuccessBaseExam(Math,MathAR)\\admission-system-omar\\server\\SchoolAdmission\\wwwroot\\uploads\\documents\\11111111111111_tuitionfeereceipt_20250804233337.jpg",
+      "PackagePath": "staticwebassets\\uploads\\documents\\11111111111111_tuitionfeereceipt_20250804233337.jpg"
+    },
+    {
+      "Id": "D:\\AdmissionProjects\\Test\\Base\\FourthSuccessBaseExam(Math,MathAR)\\admission-system-omar\\server\\SchoolAdmission\\wwwroot\\uploads\\documents\\11111111111111_tuitionfeereceipt_20250805092546.jpg",
+      "PackagePath": "staticwebassets\\uploads\\documents\\11111111111111_tuitionfeereceipt_20250805092546.jpg"
+    },
+    {
+      "Id": "D:\\AdmissionProjects\\Test\\Base\\FourthSuccessBaseExam(Math,MathAR)\\admission-system-omar\\server\\SchoolAdmission\\wwwroot\\uploads\\documents\\30801211402692_birthcertificate_20250731151919.png",
+      "PackagePath": "staticwebassets\\uploads\\documents\\30801211402692_birthcertificate_20250731151919.png"
+    },
+    {
+      "Id": "D:\\AdmissionProjects\\Test\\Base\\FourthSuccessBaseExam(Math,MathAR)\\admission-system-omar\\server\\SchoolAdmission\\wwwroot\\uploads\\documents\\30801211402692_preferencessheet_20250731151919.jpg",
+      "PackagePath": "staticwebassets\\uploads\\documents\\30801211402692_preferencessheet_20250731151919.jpg"
+    },
+    {
+      "Id": "D:\\AdmissionProjects\\Test\\Base\\FourthSuccessBaseExam(Math,MathAR)\\admission-system-omar\\server\\SchoolAdmission\\wwwroot\\uploads\\documents\\30801211402692_successreport_20250731151919.jpg",
+      "PackagePath": "staticwebassets\\uploads\\documents\\30801211402692_successreport_20250731151919.jpg"
+    },
+    {
+      "Id": "D:\\AdmissionProjects\\Test\\Base\\FourthSuccessBaseExam(Math,MathAR)\\admission-system-omar\\server\\SchoolAdmission\\wwwroot\\uploads\\documents\\30801211402692_tuitionfeereceipt_20250731151919.png",
+      "PackagePath": "staticwebassets\\uploads\\documents\\30801211402692_tuitionfeereceipt_20250731151919.png"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.SchoolAdmission.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.SchoolAdmission.props",
+      "PackagePath": "build\\SchoolAdmission.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.SchoolAdmission.props",
+      "PackagePath": "buildMultiTargeting\\SchoolAdmission.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildTransitive.SchoolAdmission.props",
+      "PackagePath": "buildTransitive\\SchoolAdmission.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

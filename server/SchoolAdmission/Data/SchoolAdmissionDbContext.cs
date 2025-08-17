@@ -1,0 +1,176 @@
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
+using SchoolAdmission.Models;
+
+namespace SchoolAdmission.Data;
+
+public partial class SchoolAdmissionDbContext : DbContext
+{
+    public SchoolAdmissionDbContext()
+    {
+    }
+
+    public SchoolAdmissionDbContext(DbContextOptions<SchoolAdmissionDbContext> options)
+        : base(options)
+    {
+    }
+
+    public virtual DbSet<Account> Accounts { get; set; }
+
+    public virtual DbSet<AccountType> AccountTypes { get; set; }
+
+    public virtual DbSet<AdmissionProfile> AdmissionProfiles { get; set; }
+
+    public virtual DbSet<ExamQuestion> ExamQuestions { get; set; }
+
+    public virtual DbSet<InterviewScore> InterviewScores { get; set; }
+
+    public virtual DbSet<Login> Logins { get; set; }
+
+    public virtual DbSet<Section> Sections { get; set; }
+
+    public virtual DbSet<StudentExamAnswer> StudentExamAnswers { get; set; }
+
+    public virtual DbSet<StudentExamResult> StudentExamResults { get; set; }
+
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.UseCollation("Arabic_100_CI_AI");
+
+        modelBuilder.Entity<Account>(entity =>
+        {
+            entity.ToTable("Account");
+
+            entity.HasIndex(e => e.Email, "UQ__Account__A9D10534E2F669CE").IsUnique();
+
+            entity.HasIndex(e => e.NationalId, "UQ__Account__E9AA32FABA05C73F").IsUnique();
+
+            entity.Property(e => e.Email).HasMaxLength(100);
+            entity.Property(e => e.FullNameAr).HasColumnName("FullNameAR");
+            entity.Property(e => e.FullNameEn).HasColumnName("FullNameEN");
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.NationalId).HasMaxLength(14);
+            entity.Property(e => e.StatusId).HasDefaultValue(1L);
+
+            entity.HasOne(d => d.AccountType).WithMany(p => p.Accounts)
+                .HasForeignKey(d => d.AccountTypeId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Account_AccountType");
+        });
+
+        modelBuilder.Entity<AccountType>(entity =>
+        {
+            entity.ToTable("AccountType");
+
+            entity.HasIndex(e => e.AccountTypeName, "UQ__AccountT__602E1DF2C9AB3F50").IsUnique();
+
+            entity.Property(e => e.AccountTypeName).HasMaxLength(100);
+        });
+
+        modelBuilder.Entity<AdmissionProfile>(entity =>
+        {
+            entity.HasKey(e => e.AccountId);
+
+            entity.ToTable("AdmissionProfile");
+
+            entity.Property(e => e.AccountId).ValueGeneratedNever();
+            entity.Property(e => e.ArabicInterviewScore).HasColumnType("decimal(5, 2)");
+            entity.Property(e => e.EnglishInterviewScore).HasColumnType("decimal(5, 2)");
+            entity.Property(e => e.EnglishScore).HasColumnType("decimal(5, 2)");
+            entity.Property(e => e.MathInterviewScore).HasColumnType("decimal(5, 2)");
+            entity.Property(e => e.MathScore).HasColumnType("decimal(5, 2)");
+            entity.Property(e => e.MinistryExamPercentage).HasColumnType("decimal(5, 2)");
+            entity.Property(e => e.ParentPhoneNumber).HasMaxLength(20);
+            entity.Property(e => e.PhoneNumber).HasMaxLength(20);
+            entity.Property(e => e.SoftwareInterviewScore).HasColumnType("decimal(5, 2)");
+            entity.Property(e => e.StatusId).HasDefaultValue(1L);
+            entity.Property(e => e.ThirdPrepScore).HasColumnType("decimal(5, 2)");
+
+            entity.HasOne(d => d.Account).WithOne(p => p.AdmissionProfile)
+                .HasForeignKey<AdmissionProfile>(d => d.AccountId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_AdmissionProfile_Account");
+        });
+
+        modelBuilder.Entity<ExamQuestion>(entity =>
+        {
+            entity.ToTable("ExamQuestion");
+
+            entity.HasOne(d => d.Section).WithMany(p => p.ExamQuestions)
+                .HasForeignKey(d => d.SectionId)
+                .HasConstraintName("FK_ExamQuestion_Section");
+        });
+
+        modelBuilder.Entity<InterviewScore>(entity =>
+        {
+            entity.ToTable("InterviewScore");
+
+            entity.Property(e => e.Score).HasColumnType("decimal(5, 2)");
+
+            entity.HasOne(d => d.Account).WithMany(p => p.InterviewScoreAccounts)
+                .HasForeignKey(d => d.AccountId)
+                .HasConstraintName("FK_InterviewScore_Student_Account");
+
+            entity.HasOne(d => d.Interviewer).WithMany(p => p.InterviewScoreInterviewers)
+                .HasForeignKey(d => d.InterviewerId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_InterviewScore_Admin_Account");
+        });
+
+        modelBuilder.Entity<Login>(entity =>
+        {
+            entity.ToTable("Login");
+
+            entity.Property(e => e.Email).HasMaxLength(100);
+            entity.Property(e => e.StatusId).HasDefaultValue(1L);
+
+            entity.HasOne(d => d.Account).WithMany(p => p.Logins)
+                .HasForeignKey(d => d.AccountId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Login_Account");
+        });
+
+        modelBuilder.Entity<Section>(entity =>
+        {
+            entity.ToTable("Section");
+
+            entity.HasIndex(e => e.SectionName, "UQ_Section_SectionName").IsUnique();
+
+            entity.Property(e => e.SectionName).HasMaxLength(100);
+        });
+
+        modelBuilder.Entity<StudentExamAnswer>(entity =>
+        {
+            entity.ToTable("StudentExamAnswer");
+
+            entity.HasIndex(e => new { e.AccountId, e.ExamId }, "UQ_StudentExamAnswer_AccountExam").IsUnique();
+
+            entity.HasOne(d => d.Account).WithMany(p => p.StudentExamAnswers)
+                .HasForeignKey(d => d.AccountId)
+                .HasConstraintName("FK_StudentExamAnswer_Account");
+
+            entity.HasOne(d => d.Exam).WithMany(p => p.StudentExamAnswers)
+                .HasForeignKey(d => d.ExamId)
+                .HasConstraintName("FK_StudentExamAnswer_ExamQuestion");
+        });
+
+        modelBuilder.Entity<StudentExamResult>(entity =>
+        {
+            entity.HasKey(e => e.AccountId);
+
+            entity.ToTable("StudentExamResult");
+
+            entity.Property(e => e.AccountId).ValueGeneratedNever();
+
+            entity.HasOne(d => d.Account).WithOne(p => p.StudentExamResult)
+                .HasForeignKey<StudentExamResult>(d => d.AccountId)
+                .HasConstraintName("FK_StudentExamResult_Account");
+        });
+
+        OnModelCreatingPartial(modelBuilder);
+    }
+
+    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+}
