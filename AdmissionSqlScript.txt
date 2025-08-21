@@ -1,0 +1,157 @@
+-- SCHOOL ADMISSION SYSTEM - DATABASE SCHEMA SCRIPTS
+
+-- This script contains the SQL statements
+-- to create the 5 new tables for the School Admission System exam functionality,
+-- plus modifications to the existing AdmissionProfile table.
+
+
+-- NOTES:
+-- 1. These tables are designed to work with the existing ElsewedySchoolSys database
+-- 2. Interview scores are separate from exam scores
+
+
+-- =====================================================
+-- 1. SECTION TABLE
+-- =====================================================
+-- This table defines our exam subjects. Every exam question will belong
+-- to one of these sections, which helps with organization and scoring.
+-- Example: English, Math, Arabic, Software
+-- =====================================================
+-- dbo.AccountType: Lookup table for different types of user accounts.
+
+
+
+CREATE TABLE [dbo].[Section] (
+    [Id] BIGINT IDENTITY(1,1) NOT NULL,
+    [SectionName] NVARCHAR(100) NOT NULL,
+    
+    CONSTRAINT [PK_Section] PRIMARY KEY ([Id]),
+    CONSTRAINT [UQ_Section_SectionName] UNIQUE ([SectionName])
+);
+
+-- Insert the 4 required sections
+INSERT INTO [dbo].[Section] ([SectionName]) VALUES 
+    ('English'),
+    ('Math'), 
+    ('Arabic'),
+    ('Software');
+
+-- =====================================================
+-- 2. EXAM QUESTIONS TABLE (ExamQuestion)
+-- =====================================================
+-- This table is our question bank. It stores each question, its four choices,
+-- the correct answer, and which subject it belongs to.
+-- =====================================================
+
+CREATE TABLE [dbo].[ExamQuestion] (
+    [Id] BIGINT IDENTITY(1,1) NOT NULL,     
+    [QuestionTitle] NVARCHAR(MAX) NOT NULL, -- The actual question text       ex:(What's the capital of france?)
+    [Choice1] NVARCHAR(MAX) NOT NULL,		-- First multiple choice option   ex:(Paris)
+    [Choice2] NVARCHAR(MAX) NOT NULL,		-- Second multiple choice option  ex:(Egypt)
+    [Choice3] NVARCHAR(MAX) NOT NULL,		-- Third multiple choice option
+    [Choice4] NVARCHAR(MAX) NOT NULL,		-- Fourth multiple choice option
+    [CorrectAnswer] NVARCHAR(MAX) NOT NULL,	-- The correct answer text        ex:(Paris)
+    [SectionId] BIGINT NOT NULL,			-- Foreign key to Section table
+    
+    CONSTRAINT [PK_ExamQuestion] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_ExamQuestion_Section] FOREIGN KEY ([SectionId]) 
+        REFERENCES [dbo].[Section] ([Id]) ON DELETE CASCADE,
+
+    CONSTRAINT [CK_ExamQuestion_CorrectAnswer] 
+	CHECK ([CorrectAnswer] IN ([Choice1], [Choice2], [Choice3], [Choice4])
+    )
+);
+
+-- =====================================================
+-- 3. STUDENT EXAM ANSWERS TABLE (StudentExamAnswer)
+-- =====================================================
+-- This table tracks the specific answer a student chose for each question.
+-- This allows us to re-evaluate scores later if needed.
+-- =====================================================
+
+CREATE TABLE [dbo].[StudentExamAnswer] (
+    [Id] BIGINT IDENTITY(1,1) NOT NULL,
+    [AccountId] BIGINT NOT NULL,             -- Foreign key to Accounts table (Student role)
+    [ExamId] BIGINT NOT NULL,				 -- Foreign key to ExamQuestions table
+    [ChoosedAnswer] NVARCHAR(MAX) NOT NULL,	 -- Student's chosen answer (can be "0", "1", "2", "3" or actual text)
+    [Score] BIT NOT NULL DEFAULT 0,			 -- Whether the answer is correct (calculated by backend)
+    
+    CONSTRAINT [PK_StudentExamAnswer] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_StudentExamAnswer_Account] FOREIGN KEY ([AccountId]) 
+        REFERENCES [dbo].[Account] ([Id]) ON DELETE CASCADE,
+
+    CONSTRAINT [FK_StudentExamAnswer_ExamQuestion] FOREIGN KEY ([ExamId]) 
+        REFERENCES [dbo].[ExamQuestion] ([Id]) ON DELETE CASCADE,
+
+    CONSTRAINT [UQ_StudentExamAnswer_AccountExam] UNIQUE ([AccountId], [ExamId])
+);
+
+-- =====================================================
+-- 4. STUDENT EXAM RESULTS TABLE (StudentExamResult)
+-- =====================================================
+-- This table stores the final, aggregated scores for each student by subject.
+-- This data is calculated from the StudentExamAnswer table
+-- =====================================================
+
+CREATE TABLE [dbo].[StudentExamResult] (
+    [AccountId] BIGINT NOT NULL,               -- Foreign key to Accounts table (Student) - Primary Key
+    [ExamArabicScore] INT NOT NULL DEFAULT 0,  -- Arabic section score (0-15) 
+    [ExamEnglishScore] INT NOT NULL DEFAULT 0, -- English section score (0-15) 
+    [ExamMathScore] INT NOT NULL DEFAULT 0,	   -- Math section score (0-15) 
+    [ExamSoftwareScore] INT NOT NULL DEFAULT 0,-- Software section score (0-15)EY ([AccountId]), 
+    										    
+    CONSTRAINT [PK_StudentExamResult] PRIMARY KEY ([AccountId]),
+    CONSTRAINT [FK_StudentExamResult_Account] FOREIGN KEY ([AccountId]) 
+        REFERENCES [dbo].[Account] ([Id]) ON DELETE CASCADE,
+    CONSTRAINT [CK_StudentExamResult_ArabicScore] CHECK ([ExamArabicScore] >= 0 AND [ExamArabicScore] <= 15),
+    CONSTRAINT [CK_StudentExamResult_EnglishScore] CHECK ([ExamEnglishScore] >= 0 AND [ExamEnglishScore] <= 15),
+    CONSTRAINT [CK_StudentExamResult_MathScore] CHECK ([ExamMathScore] >= 0 AND [ExamMathScore] <= 15),
+    CONSTRAINT [CK_StudentExamResult_SoftwareScore] CHECK ([ExamSoftwareScore] >= 0 AND [ExamSoftwareScore] <= 15)
+);
+
+-- =====================================================
+-- 5. INTERVIEW SCORES TABLE (InterviewScore)
+-- =====================================================
+-- This table allows us to store multiple interview scores for a student,
+-- each from a different interviewer.
+-- =====================================================
+
+CREATE TABLE [dbo].[InterviewScore] (
+    [Id] BIGINT IDENTITY(1,1) NOT NULL,
+    [AccountId] BIGINT NOT NULL,      -- Foreign key to Accounts table (Student being scored)
+    [InterviewerId] BIGINT NOT NULL,  -- Foreign key to Accounts table (Interviewer giving the score)
+    [Score] DECIMAL(5,2) NOT NULL,	  -- Interview score (typically 0-100 or similar scale)
+    
+    CONSTRAINT [PK_InterviewScore] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_InterviewScore_Student_Account] FOREIGN KEY ([AccountId]) 
+        REFERENCES [dbo].[Account] ([Id]) ON DELETE CASCADE, -- ده المسار اللي هنخليه يمسح تلقائي
+
+    CONSTRAINT [FK_InterviewScore_Admin_Account] FOREIGN KEY ([InterviewerId]) 
+        REFERENCES [dbo].[Account] ([Id]) ON DELETE NO ACTION -- ده المسار اللي هنوقفه
+);
+
+-- =====================================================
+-- 6. ADMISSION PROFILE TABLE MODIFICATIONS
+-- =====================================================
+-- Purpose: Add new fields to existing AdmissionProfile table
+-- Note: This table already exists in the main database
+-- These are required for our admission system workflow.
+-- =====================================================
+
+-- Add new fields for admission system functionality
+-- We'll add the new columns first
+ALTER TABLE [dbo].[AdmissionProfile] ADD
+    [ParentPhoneNumber] NVARCHAR(20) NULL,
+    [PreviousSchoolType] NVARCHAR(MAX) NULL,
+    [MinistryExamPercentage] DECIMAL(5,2) NOT NULL DEFAULT 0.0, -- from 0 - 100
+    [ParentOccupation] NVARCHAR(MAX) NULL, --Doctor
+    [City] NVARCHAR(MAX) NULL,
+    [District] NVARCHAR(MAX) NULL,
+    [StreetName] NVARCHAR(MAX) NULL,
+    [BuildingNo] NVARCHAR(MAX) NULL, --222
+    [BirthCertificatePath] NVARCHAR(MAX) NULL,
+    [SuccessReportPath] NVARCHAR(MAX) NULL,
+    [TuitionFeeReceiptPath] NVARCHAR(MAX) NULL,
+    [PreferencesSheetPath] NVARCHAR(MAX) NULL,
+    CONSTRAINT [CK_AdmissionProfile_MinistryExamPercentage]
+    CHECK ([MinistryExamPercentage] >= 0.0 AND [MinistryExamPercentage] <= 100.0);
