@@ -2729,3 +2729,10 @@ D:\AdmissionProjects\Test\Base2\iisBASE\server\SchoolAdmission\obj\Debug\net8.0\
 D:\AdmissionProjects\Test\Base2\iisBASE\server\SchoolAdmission\obj\Debug\net8.0\SchoolAdmission.genruntimeconfig.cache
 D:\AdmissionProjects\Test\Base2\iisBASE\server\SchoolAdmission\obj\Debug\net8.0\ref\SchoolAdmission.dll
 D:\AdmissionProjects\Test\Base2\iisBASE\server\SchoolAdmission\bin\Debug\net8.0\web.config
+D:\AdmissionProjects\Test\Base2\iisBASE\server\SchoolAdmission\obj\Debug\net8.0\SchoolAdmission.sourcelink.json
+D:\AdmissionProjects\Test\Base2\iisBASE\server\SchoolAdmission\bin\Debug\net8.0\publish\web.config
+D:\AdmissionProjects\Test\Base2\iisBASE\server\SchoolAdmission\bin\Debug\net8.0\publish\appsettings.Development.json
+D:\AdmissionProjects\Test\Base2\iisBASE\server\SchoolAdmission\bin\Debug\net8.0\publish\appsettings.json
+D:\AdmissionProjects\Test\Base2\iisBASE\server\SchoolAdmission\bin\Debug\net8.0\publish\appsettings.Production.json
+D:\AdmissionProjects\Test\Base2\iisBASE\server\SchoolAdmission\bin\Debug\net8.0\publish\SchoolAdmission.deps.json
+D:\AdmissionProjects\Test\Base2\iisBASE\server\SchoolAdmission\bin\Debug\net8.0\publish\SchoolAdmission.runtimeconfig.json

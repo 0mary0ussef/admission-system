@@ -37,6 +37,7 @@ public class ExamController : ControllerBase
     }
 
     // 1. Import Questions from Excel
+    /*
     [HttpPost("import-questions")]
     [Authorize]
     public async Task<IActionResult> ImportQuestionsFromExcel(IFormFile file)
@@ -117,9 +118,11 @@ public class ExamController : ControllerBase
             return StatusCode(500, $"Error importing questions: {ex.Message}");
         }
     }
+    
+    */
 
     // 2. Import Questions from Excel (Multiple Sheets by SectionId)
-    /*
+    
         [HttpPost("import-questions")]
         [Authorize]
         public async Task<IActionResult> ImportQuestionsFromExcelMultiSheets(IFormFile file)
@@ -204,8 +207,7 @@ public class ExamController : ControllerBase
                 return StatusCode(500, $"Error importing questions: {ex.Message}");
             }
         }
-    */
-
+    
 
     // Get Questions by Section and school type, old Logic- Without Randomization
     /*

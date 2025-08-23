@@ -151,3 +151,4 @@ D:\AdmissionProjects\Test\Base2\iisBASE\server\SchoolAdmission\obj\Release\net8.
 D:\AdmissionProjects\Test\Base2\iisBASE\server\SchoolAdmission\obj\Release\net8.0\SchoolAdmission.genruntimeconfig.cache
 D:\AdmissionProjects\Test\Base2\iisBASE\server\SchoolAdmission\obj\Release\net8.0\ref\SchoolAdmission.dll
 D:\AdmissionProjects\Test\Base2\iisBASE\server\SchoolAdmission\bin\Release\net8.0\web.config
+D:\AdmissionProjects\Test\Base2\iisBASE\server\SchoolAdmission\obj\Release\net8.0\SchoolAdmission.sourcelink.json
