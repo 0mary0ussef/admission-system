@@ -12,7 +12,7 @@ using System.Security.Claims;
 public class ExamController : ControllerBase
 {
     private readonly SchoolAdmissionDbContext db;
-    public static int questionsCount = 5;
+    public static int questionsCount = 10;
 
     public ExamController(SchoolAdmissionDbContext context)
     {

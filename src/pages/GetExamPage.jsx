@@ -21,7 +21,8 @@ const GetExamPage = () => {
   const [currentSection, setCurrentSection] = useState(0);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
-  const [timeLeft, setTimeLeft] = useState(2 * 60); // 2 minutes in seconds
+  const [timeLeft, setTimeLeft] = useState(60 * 60); // 1 hour in seconds
+  const [savedPosition, setSavedPosition] = useState(null); // Save position before validation
   const [showExitWarning, setShowExitWarning] = useState(false);
   const [showFullScreenWarning, setShowFullScreenWarning] = useState(false);
   const [showTeacherExtension, setShowTeacherExtension] = useState(false);
@@ -102,7 +103,7 @@ const GetExamPage = () => {
       // Start timer
       const examStartTime = Date.now();
       localStorage.setItem("examStartTime", examStartTime.toString());
-    } catch (err) {
+    } catch {
       setError("Failed to load exam data. Please refresh the page.");
     } finally {
       setIsLoading(false);
@@ -235,7 +236,99 @@ const GetExamPage = () => {
     });
   };
 
+  // Find first unanswered question
+  const findFirstUnansweredQuestion = () => {
+    for (
+      let sectionIndex = 0;
+      sectionIndex < examData.sections.length;
+      sectionIndex++
+    ) {
+      const section = examData.sections[sectionIndex];
+      const questions = examData.questionsData[section.sectionName] || [];
+
+      for (
+        let questionIndex = 0;
+        questionIndex < questions.length;
+        questionIndex++
+      ) {
+        const question = questions[questionIndex];
+        if (answers[question.id] === undefined) {
+          return { sectionIndex, questionIndex };
+        }
+      }
+    }
+    return null; // All questions answered
+  };
+
+  // Find next unanswered question from current position
+  const findNextUnansweredQuestion = () => {
+    // Start from current position
+    for (
+      let sectionIndex = currentSection;
+      sectionIndex < examData.sections.length;
+      sectionIndex++
+    ) {
+      const section = examData.sections[sectionIndex];
+      const questions = examData.questionsData[section.sectionName] || [];
+
+      // Start from current question if same section, otherwise from 0
+      const startQuestionIndex =
+        sectionIndex === currentSection ? currentQuestion + 1 : 0;
+
+      for (
+        let questionIndex = startQuestionIndex;
+        questionIndex < questions.length;
+        questionIndex++
+      ) {
+        const question = questions[questionIndex];
+        if (answers[question.id] === undefined) {
+          return { sectionIndex, questionIndex };
+        }
+      }
+    }
+
+    // If not found after current position, search from beginning
+    return findFirstUnansweredQuestion();
+  };
+
+  // Validate all questions are answered
+  const validateAllQuestionsAnswered = () => {
+    const totalQuestions = examData.sections.reduce(
+      (sum, section) =>
+        sum + (examData.questionsData[section.sectionName]?.length || 0),
+      0
+    );
+    const answeredQuestions = Object.keys(answers).length;
+    return answeredQuestions === totalQuestions;
+  };
+
+  // Return to saved position after answering a question
+  const returnToSavedPosition = () => {
+    if (savedPosition) {
+      setCurrentSection(savedPosition.section);
+      setCurrentQuestion(savedPosition.question);
+      setSavedPosition(null);
+    }
+  };
+
   const handleSubmitExam = async () => {
+    // Check if all questions are answered
+    if (!validateAllQuestionsAnswered()) {
+      const firstUnanswered = findFirstUnansweredQuestion();
+      if (firstUnanswered) {
+        // Save current position
+        setSavedPosition({
+          section: currentSection,
+          question: currentQuestion,
+        });
+
+        // Go to first unanswered question
+        setCurrentSection(firstUnanswered.sectionIndex);
+        setCurrentQuestion(firstUnanswered.questionIndex);
+        return;
+      }
+    }
+
     try {
       setIsSubmitting(true);
 
@@ -256,7 +349,7 @@ const GetExamPage = () => {
 
       // Redirect to completion page
       navigate("/exam-completed");
-    } catch (err) {
+    } catch {
       setError("Failed to submit exam. Please try again.");
     } finally {
       setIsSubmitting(false);
@@ -290,7 +383,7 @@ const GetExamPage = () => {
 
       // Redirect to completion page
       navigate("/exam-completed");
-    } catch (err) {
+    } catch {
       setError("Failed to submit exam. Please try again.");
     } finally {
       setIsSubmitting(false);
@@ -474,23 +567,56 @@ const GetExamPage = () => {
           {/* Subject Navigation */}
           <div className="mb-6">
             <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
-              {examData.sections.map((section, index) => (
-                <button
-                  key={index}
-                  onClick={() => {
-                    setCurrentSection(index);
-                    setCurrentQuestion(0);
-                  }}
-                  disabled={isSubmitting}
-                  className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
-                    currentSection === index
-                      ? "bg-white text-[#ef3131] shadow-sm border-b-2 border-[#ef3131]"
-                      : "text-gray-600 hover:text-[#ef3131] hover:bg-white/50"
-                  } ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
-                >
-                  {section.sectionName}
-                </button>
-              ))}
+              {examData.sections.map((section, index) => {
+                const sectionQuestions =
+                  examData.questionsData[section.sectionName] || [];
+                const answeredQuestions = sectionQuestions.filter(
+                  (q) => answers[q.id] !== undefined
+                ).length;
+                const totalQuestions = sectionQuestions.length;
+                const isComplete =
+                  answeredQuestions === totalQuestions && totalQuestions > 0;
+                const hasUnanswered =
+                  answeredQuestions < totalQuestions && answeredQuestions > 0;
+
+                return (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      setCurrentSection(index);
+                      setCurrentQuestion(0);
+                    }}
+                    disabled={isSubmitting}
+                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 relative ${
+                      currentSection === index
+                        ? "bg-white text-[#ef3131] shadow-sm border-b-2 border-[#ef3131]"
+                        : "text-gray-600 hover:text-[#ef3131] hover:bg-white/50"
+                    } ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
+                  >
+                    <div className="flex items-center justify-center">
+                      <span>{section.sectionName}</span>
+                      {isComplete && (
+                        <svg
+                          className="h-4 w-4 ml-1 text-green-500"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      )}
+                      {hasUnanswered && (
+                        <div className="ml-1 text-xs bg-orange-500 text-white px-1.5 py-0.5 rounded-full">
+                          {answeredQuestions}/{totalQuestions}
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -597,33 +723,91 @@ const GetExamPage = () => {
                 </RadioGroup>
 
                 <div className="flex justify-between pt-6 border-t border-gray-200">
-                  <Button
-                    variant="outline"
-                    onClick={() =>
-                      setCurrentQuestion((prev) => Math.max(0, prev - 1))
-                    }
-                    disabled={
-                      (currentSection === 0 && currentQuestion === 0) ||
-                      isSubmitting ||
-                      !currentQuestionData
-                    }
-                    className="px-6 py-3 rounded-full border-2 hover:border-[#ef3131] hover:text-[#ef3131] transition-all duration-200"
-                  >
-                    <svg
-                      className="h-5 w-5 mr-2"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                  <div className="flex space-x-3">
+                    <Button
+                      variant="outline"
+                      onClick={() =>
+                        setCurrentQuestion((prev) => Math.max(0, prev - 1))
+                      }
+                      disabled={
+                        (currentSection === 0 && currentQuestion === 0) ||
+                        isSubmitting ||
+                        !currentQuestionData
+                      }
+                      className="px-6 py-3 rounded-full border-2 hover:border-[#ef3131] hover:text-[#ef3131] transition-all duration-200"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 19l-7-7 7-7"
-                      />
-                    </svg>
-                    Previous
-                  </Button>
+                      <svg
+                        className="h-5 w-5 mr-2"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 19l-7-7 7-7"
+                        />
+                      </svg>
+                      Previous
+                    </Button>
+
+                    {/* Return to Saved Position Button */}
+                    {savedPosition && (
+                      <Button
+                        variant="outline"
+                        onClick={returnToSavedPosition}
+                        disabled={isSubmitting}
+                        className="px-6 py-3 rounded-full border-2 border-blue-500 text-blue-600 hover:border-blue-600 hover:text-blue-700 transition-all duration-200"
+                      >
+                        <svg
+                          className="h-5 w-5 mr-2"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                          />
+                        </svg>
+                        Return to Finish
+                      </Button>
+                    )}
+
+                    {/* Skip to Next Unanswered Button */}
+                    {savedPosition && (
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          const nextUnanswered = findNextUnansweredQuestion();
+                          if (nextUnanswered) {
+                            setCurrentSection(nextUnanswered.sectionIndex);
+                            setCurrentQuestion(nextUnanswered.questionIndex);
+                          }
+                        }}
+                        disabled={isSubmitting}
+                        className="px-6 py-3 rounded-full border-2 border-green-500 text-green-600 hover:border-green-600 hover:text-green-700 transition-all duration-200"
+                      >
+                        <svg
+                          className="h-5 w-5 mr-2"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M13 7l5 5m0 0l-5 5m5-5H6"
+                          />
+                        </svg>
+                        Skip to Next Unanswered
+                      </Button>
+                    )}
+                  </div>
 
                   <Button
                     onClick={() => {

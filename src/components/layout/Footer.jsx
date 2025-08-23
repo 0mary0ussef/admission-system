@@ -145,9 +145,54 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-gray-700 mt-8 md:mt-12 pt-6 md:pt-8 text-center">
-          <p className="text-gray-400 text-sm md:text-base">
+          <p className="text-gray-400 text-sm md:text-base mb-4">
             © 2025 El Sewedy International School. All rights reserved.
           </p>
+
+          {/* Developers Section */}
+          <div className="text-center relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-900/30 to-transparent animate-pulse"></div>
+            <div className="relative bg-gradient-to-r from-black via-gray-900 to-black rounded-2xl p-6 border border-red-800/50 shadow-2xl">
+              <h4 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-red-600 to-red-800 animate-pulse mb-6">
+                ⚡ Developed by the Elite ⚡
+              </h4>
+
+              <div className="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-8">
+                {/* Visiliki */}
+                <div className="group relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-red-800 to-red-900 rounded-xl blur-lg group-hover:blur-xl transition-all duration-500 opacity-75 group-hover:opacity-100 animate-pulse-red"></div>
+                  <div className="relative bg-gradient-to-r from-red-800 to-red-900 p-1 rounded-xl hover:scale-105 transition-all duration-300 cursor-pointer group-hover:neon-glow-red gothic-shadow">
+                    <div className="bg-black rounded-lg px-6 py-3 border border-red-800/30 dark-glow">
+                      <h5 className="text-red-300 font-bold text-lg tracking-wider group-hover:text-red-400 transition-colors duration-300">
+                        Visiliki
+                      </h5>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Omar Advanced */}
+                <div className="group relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl blur-lg group-hover:blur-xl transition-all duration-500 opacity-75 group-hover:opacity-100 animate-pulse-gray"></div>
+                  <div className="relative bg-gradient-to-r from-gray-800 to-gray-900 p-1 rounded-xl hover:scale-105 transition-all duration-300 cursor-pointer group-hover:neon-glow-gray gothic-shadow">
+                    <div className="bg-black rounded-lg px-6 py-3 border border-gray-700/30 dark-glow">
+                      <h5 className="text-gray-300 font-bold text-lg tracking-wider group-hover:text-gray-400 transition-colors duration-300">
+                        Omar Advanced
+                      </h5>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Gothic Elements */}
+              <div className="absolute top-2 left-4 w-2 h-2 bg-red-600 rounded-full animate-ping"></div>
+              <div className="absolute top-4 right-6 w-3 h-3 bg-red-800 rounded-full animate-pulse"></div>
+              <div className="absolute bottom-4 left-6 w-2 h-2 bg-gray-600 rounded-full animate-bounce"></div>
+              <div className="absolute bottom-2 right-4 w-3 h-3 bg-gray-800 rounded-full animate-ping"></div>
+
+              {/* Dark Border Effect */}
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-red-900/20 via-transparent to-gray-900/20 animate-pulse"></div>
+            </div>
+          </div>
         </div>
       </div>
     </footer>

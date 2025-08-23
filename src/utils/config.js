@@ -1,7 +1,7 @@
 // Environment configuration
 const config = {
   development: {
-    apiBaseUrl: "http://localhost:5001/api",
+    apiBaseUrl: "http://localhost:5253/api",
     timeout: 10000,
     enableDebugLogs: true,
   },
