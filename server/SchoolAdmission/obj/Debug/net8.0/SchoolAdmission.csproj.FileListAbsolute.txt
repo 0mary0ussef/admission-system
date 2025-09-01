@@ -3382,3 +3382,4 @@ M:\Admission-System-LastInSchool\server\SchoolAdmission\obj\Debug\net8.0\refint\
 M:\Admission-System-LastInSchool\server\SchoolAdmission\obj\Debug\net8.0\SchoolAdmission.pdb
 M:\Admission-System-LastInSchool\server\SchoolAdmission\obj\Debug\net8.0\SchoolAdmission.genruntimeconfig.cache
 M:\Admission-System-LastInSchool\server\SchoolAdmission\obj\Debug\net8.0\ref\SchoolAdmission.dll
+M:\Admission-System-LastInSchool\server\SchoolAdmission\obj\Debug\net8.0\SchoolAdmission.sourcelink.json

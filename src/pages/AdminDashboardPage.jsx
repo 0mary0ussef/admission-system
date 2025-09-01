@@ -28,6 +28,7 @@ const AdminDashboardPage = () => {
   const navigate = useNavigate();
   const {
     students,
+    allStudents,
     currentPage,
     pageSize,
     totalItems,
@@ -180,17 +181,17 @@ const AdminDashboardPage = () => {
     setSelectedStudent(null);
   };
 
-  // Calculate stats for dashboard cards
+  // Calculate stats for dashboard cards using allStudents for accurate totals
   const stats = {
-    totalStudents: totalItems,
-    withAcceptanceLetter: students.filter((s) => s.ministryExamPercentage >= 50)
+    totalStudents: allStudents.length,
+    withAcceptanceLetter: allStudents.filter((s) => s.ministryExamPercentage >= 50)
       .length,
-    interviewed: students.filter((s) => s.interviewScore > 0).length,
+    interviewed: allStudents.filter((s) => s.interviewScore > 0).length,
     averageScore:
-      students
+      allStudents
         .filter((s) => s.interviewScore > 0)
         .reduce((sum, s) => sum + (s.interviewScore || 0), 0) /
-        students.filter((s) => s.interviewScore > 0).length || 0,
+        allStudents.filter((s) => s.interviewScore > 0).length || 0,
   };
 
   // Authentication is handled by SessionManager component

@@ -27,6 +27,7 @@ const SuperAdminDashboardPage = () => {
   const navigate = useNavigate();
   const {
     students,
+    allStudents,
     currentPage,
     pageSize,
     totalItems,
@@ -144,20 +145,24 @@ const SuperAdminDashboardPage = () => {
     }
   };
 
-  // Calculate stats for dashboard cards
+  // Calculate stats for dashboard cards using allStudents for accurate totals
   const stats = {
-    totalStudents: totalItems,
-    withAcceptanceLetter: students.filter((s) => s.ministryExamPercentage >= 50)
-      .length,
-    interviewed: students.filter((s) => {
+    totalStudents: allStudents.length,
+    accepted: allStudents.filter((s) =>
+      s.Status === "2" || s.status === "2" || s.status === 2
+    ).length,
+    interviewed: allStudents.filter((s) => {
       if (currentAdminRole === "SuperAdmin") {
         return s.interviewScores && s.interviewScores.length > 0;
       } else {
         return s.interviewScore > 0;
       }
     }).length,
+    pending: allStudents.filter((s) =>
+      s.Status === "1" || s.status === "1" || s.status === 1
+    ).length,
     averageScore:
-      students
+      allStudents
         .filter((s) => {
           if (currentAdminRole === "SuperAdmin") {
             return s.interviewScores && s.interviewScores.length > 0;
@@ -172,7 +177,7 @@ const SuperAdminDashboardPage = () => {
             return sum + (s.interviewScore || 0);
           }
         }, 0) /
-        students.filter((s) => {
+        allStudents.filter((s) => {
           if (currentAdminRole === "SuperAdmin") {
             return s.interviewScores && s.interviewScores.length > 0;
           } else {
@@ -387,14 +392,7 @@ const SuperAdminDashboardPage = () => {
                       Accepted
                     </p>
                     <p className="text-2xl font-bold text-gray-900">
-                      {
-                        students.filter(
-                          (s) =>
-                            s.Status === "2" ||
-                            s.status === "2" ||
-                            s.status === 2
-                        ).length
-                      }
+                      {stats.accepted}
                     </p>
                   </div>
                 </div>
@@ -458,14 +456,7 @@ const SuperAdminDashboardPage = () => {
                   <div>
                     <p className="text-sm font-medium text-gray-600">Pending</p>
                     <p className="text-2xl font-bold text-gray-900">
-                      {
-                        students.filter(
-                          (s) =>
-                            s.Status === "1" ||
-                            s.status === "1" ||
-                            s.status === 1
-                        ).length
-                      }
+                      {stats.pending}
                     </p>
                   </div>
                 </div>

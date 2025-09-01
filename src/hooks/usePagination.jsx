@@ -258,6 +258,7 @@ export const usePagination = () => {
 
   return {
     students,
+    allStudents,
     currentPage,
     pageSize,
     totalItems,
