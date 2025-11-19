@@ -1,11 +1,12 @@
 {
   "Version": 1,
-  "Hash": "KBZ1t23V7evoe1BgY8lrCiBuMlqCPzCxGnlhRnhkqno=",
+  "Hash": "EWrVdg1vMvO24ucb2pF2QQeY3md3B53UVxYmBkQAcbA=",
   "Source": "SchoolAdmission",
   "BasePath": "_content/SchoolAdmission",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
   "DiscoveryPatterns": [],
-  "Assets": []
+  "Assets": [],
+  "Endpoints": []
 }

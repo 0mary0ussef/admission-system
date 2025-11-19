@@ -125,8 +125,14 @@ export const adminAPI = {
   updateStudentStatus: (studentId, status) =>
     api.put(`/Admin/student/${studentId}/status`, { Status: status }),
 
-  exportStudentsToExcel: () =>
-    api.get("/Admin/export-students-excel", { responseType: "blob" }),
+  exportStudentsToExcel: (columns) =>
+    api.post(
+      "/Admin/export-students-excel",
+      { columns },
+      { responseType: "blob" }
+    ),
+
+  getExportColumns: () => api.get("/Admin/export-students-columns"),
 };
 
 // Staff Admin API

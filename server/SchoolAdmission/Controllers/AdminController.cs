@@ -7,6 +7,8 @@ using OfficeOpenXml.Style;
 using SchoolAdmission.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using System.Collections.Generic;
+using System;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -15,6 +17,25 @@ public class AdminController : ControllerBase
 {
     private readonly IAdminService _adminService;
     private readonly SchoolAdmissionDbContext _db;
+    private static readonly List<ExportColumnDefinitionDTO> ExportableColumns = new()
+    {
+        new ExportColumnDefinitionDTO { Key = "StudName", Label = "Student Name", Description = "Full name of the applicant" },
+        new ExportColumnDefinitionDTO { Key = "SocialID", Label = "National ID", Description = "National identification number" },
+        new ExportColumnDefinitionDTO { Key = "Prep_Scores", Label = "Prep Scores", Description = "Math & English prep scores" },
+        new ExportColumnDefinitionDTO { Key = "Prep_Final%", Label = "Prep Final %", Description = "Final year percentage" },
+        new ExportColumnDefinitionDTO { Key = "MinistryExam%", Label = "Ministry Exam %", Description = "Ministry exam percentage" },
+        new ExportColumnDefinitionDTO { Key = "InterviewersScores", Label = "Interviewers Scores", Description = "Scores given by interviewers" },
+        new ExportColumnDefinitionDTO { Key = "Interviewers_SUM_Scores", Label = "Interviewers Sum", Description = "Sum of interviewer scores" },
+        new ExportColumnDefinitionDTO { Key = "Interviewers_Count", Label = "Interviewers Count", Description = "Number of interviewers" },
+        new ExportColumnDefinitionDTO { Key = "Interviewers_AVG_Scores%", Label = "Interview Average %", Description = "Average interviewer score (percentage)" },
+        new ExportColumnDefinitionDTO { Key = "SchoolExamSectionScores", Label = "Exam Section Scores", Description = "Detailed school exam section scores" },
+        new ExportColumnDefinitionDTO { Key = "SchoolExamSection_SUM_Scores", Label = "Exam Section Sum", Description = "Sum of school exam section scores" },
+        new ExportColumnDefinitionDTO { Key = "SchoolExamSection_Count", Label = "Exam Section Count", Description = "Number of school exam sections" },
+        new ExportColumnDefinitionDTO { Key = "SchoolExamSection_Scores_AVG%", Label = "Exam Section Avg %", Description = "Average school exam section percentage" },
+        new ExportColumnDefinitionDTO { Key = "ResultAdmission1%", Label = "Result Admission 1 %", Description = "First admission metric" },
+        new ExportColumnDefinitionDTO { Key = "ResultAdmission2%", Label = "Result Admission 2 %", Description = "Second admission metric" }
+    };
+
     public AdminController(IAdminService adminService, SchoolAdmissionDbContext db)
     {
         _adminService = adminService;
@@ -228,8 +249,36 @@ public class AdminController : ControllerBase
         }
     }
 
-    [HttpGet("export-students-excel")]
-    public async Task<IActionResult> ExportStudentsToExcel()
+    [HttpGet("export-students-columns")]
+    public async Task<IActionResult> GetExportStudentsColumns()
+    {
+        try
+        {
+            var userEmail = await _adminService.GetCurrentAdminEmailAsync(User);
+            if (string.IsNullOrEmpty(userEmail))
+                return Unauthorized("Admin not found or not authorized. Please log in again.");
+
+            var adminAccount = await _adminService.GetAccountByEmailAsync(userEmail);
+            if (adminAccount == null)
+                return Unauthorized("Admin not found or not authorized. Please log in again.");
+
+            if (adminAccount.Role.RoleName != "SuperAdmin" || adminAccount.Role.BusinessEntity != "Admission")
+                return Forbid("Only superadmins can configure export data.");
+
+            return Ok(ExportableColumns);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Forbid(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ApiResponse.ErrorResult("An error occurred while fetching export columns", ex.Message));
+        }
+    }
+
+    [HttpPost("export-students-excel")]
+    public async Task<IActionResult> ExportStudentsToExcel([FromBody] ExportStudentsRequestDTO? request)
     {
         try
         {
@@ -244,31 +293,55 @@ public class AdminController : ControllerBase
             if (adminAccount.Role.RoleName != "SuperAdmin" || adminAccount.Role.BusinessEntity != "Admission")
                 return Forbid("Only superadmins can export students data.");
 
-            // Get all students data for SuperAdmin
             var students = await _adminService.GetStudentsForSuperAdminAsync(userEmail);
-            
+
             if (students == null || students.Count == 0)
             {
                 return NotFound("No students found to export.");
             }
 
-            // Create Excel package
+            var requestedColumns = request?.Columns?
+                .Where(c => !string.IsNullOrWhiteSpace(c))
+                .Select(c => c.Trim())
+                .ToList() ?? new List<string>();
+
+            var availableKeys = new HashSet<string>(ExportableColumns.Select(c => c.Key));
+            var columnsToExport = (requestedColumns.Count > 0
+                ? requestedColumns.Where(key => availableKeys.Contains(key)).Distinct().ToList()
+                : ExportableColumns.Select(c => c.Key).ToList());
+
+            if (columnsToExport.Count == 0)
+            {
+                columnsToExport = ExportableColumns.Select(c => c.Key).ToList();
+            }
+
+            var headerLookup = ExportableColumns.ToDictionary(c => c.Key, c => c.Label);
+            var columnSelectors = new Dictionary<string, Func<dynamic, object?>>
+            {
+                ["StudName"] = data => data.Student.FullName ?? "",
+                ["SocialID"] = data => data.Student.NationalId ?? "",
+                ["Prep_Scores"] = data => data.PrepScores,
+                ["Prep_Final%"] = data => data.PrepFinalPercent,
+                ["MinistryExam%"] = data => data.MinistryExamPercent,
+                ["InterviewersScores"] = data => data.InterviewersScores,
+                ["Interviewers_SUM_Scores"] = data => data.InterviewersSumScores,
+                ["Interviewers_Count"] = data => data.InterviewersCount,
+                ["Interviewers_AVG_Scores%"] = data => data.InterviewersAvgScoresPercent,
+                ["SchoolExamSectionScores"] = data => data.SchoolExamSectionScores,
+                ["SchoolExamSection_SUM_Scores"] = data => data.SchoolExamSectionSumScores,
+                ["SchoolExamSection_Count"] = data => data.SchoolExamSectionCount,
+                ["SchoolExamSection_Scores_AVG%"] = data => data.SchoolExamSectionScoresAvgPercent,
+                ["ResultAdmission1%"] = data => data.ResultAdmission1Percent,
+                ["ResultAdmission2%"] = data => data.ResultAdmission2Percent
+            };
+
             using var package = new ExcelPackage();
             var worksheet = package.Workbook.Worksheets.Add("Students Data");
 
-            // Define headers based on the SQL query
-            var headers = new[]
+            for (int i = 0; i < columnsToExport.Count; i++)
             {
-                "StudName", "SocialID", "Prep_Scores", "Prep_Final%", "MinistryExam%",
-                "InterviewersScores", "Interviewers_SUM_Scores", "Interviewers_Count", "Interviewers_AVG_Scores%",
-                "SchoolExamSectionScores", "SchoolExamSection_SUM_Scores", "SchoolExamSection_Count", "SchoolExamSection_Scores_AVG%",
-                "ResultAdmission1%", "ResultAdmission2%"
-            };
-
-            // Add headers to worksheet
-            for (int i = 0; i < headers.Length; i++)
-            {
-                worksheet.Cells[1, i + 1].Value = headers[i];
+                var key = columnsToExport[i];
+                worksheet.Cells[1, i + 1].Value = headerLookup.TryGetValue(key, out var label) ? label : key;
                 worksheet.Cells[1, i + 1].Style.Font.Bold = true;
                 worksheet.Cells[1, i + 1].Style.Fill.PatternType = ExcelFillStyle.Solid;
                 worksheet.Cells[1, i + 1].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightBlue);
@@ -343,22 +416,14 @@ public class AdminController : ControllerBase
             int row = 2;
             foreach (var data in processedStudents)
             {
-                worksheet.Cells[row, 1].Value = data.Student.FullName ?? "";
-                worksheet.Cells[row, 2].Value = data.Student.NationalId ?? "";
-                worksheet.Cells[row, 3].Value = data.PrepScores;
-                worksheet.Cells[row, 4].Value = data.PrepFinalPercent;
-                worksheet.Cells[row, 5].Value = data.MinistryExamPercent;
-                worksheet.Cells[row, 6].Value = data.InterviewersScores;
-                worksheet.Cells[row, 7].Value = data.InterviewersSumScores;
-                worksheet.Cells[row, 8].Value = data.InterviewersCount;
-                worksheet.Cells[row, 9].Value = data.InterviewersAvgScoresPercent;
-                worksheet.Cells[row, 10].Value = data.SchoolExamSectionScores;
-                worksheet.Cells[row, 11].Value = data.SchoolExamSectionSumScores;
-                worksheet.Cells[row, 12].Value = data.SchoolExamSectionCount;
-                worksheet.Cells[row, 13].Value = data.SchoolExamSectionScoresAvgPercent;
-                worksheet.Cells[row, 14].Value = data.ResultAdmission1Percent;
-                worksheet.Cells[row, 15].Value = data.ResultAdmission2Percent;
-
+                for (int columnIndex = 0; columnIndex < columnsToExport.Count; columnIndex++)
+                {
+                    var key = columnsToExport[columnIndex];
+                    if (columnSelectors.TryGetValue(key, out var selector))
+                    {
+                        worksheet.Cells[row, columnIndex + 1].Value = selector(data);
+                    }
+                }
                 row++;
             }
 

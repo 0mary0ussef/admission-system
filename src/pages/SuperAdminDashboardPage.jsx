@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "../components/ui/Button";
 import Label from "../components/ui/Label";
 import Badge from "../components/ui/Badge";
+import Checkbox from "../components/ui/Checkbox";
 import {
   Card,
   CardContent,
@@ -22,6 +23,21 @@ import {
 import { usePagination } from "../hooks/usePagination";
 import Pagination from "../components/ui/Pagination";
 import { adminAPI } from "../utils/api";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+  Legend,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  LineChart,
+  Line,
+} from "recharts";
 
 const SuperAdminDashboardPage = () => {
   const navigate = useNavigate();
@@ -54,11 +70,17 @@ const SuperAdminDashboardPage = () => {
   const [selectedStatus, setSelectedStatus] = useState("Pending");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState(null);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [exportColumns, setExportColumns] = useState([]);
+  const [selectedColumns, setSelectedColumns] = useState([]);
+  const [isExporting, setIsExporting] = useState(false);
+  const [isLoadingColumns, setIsLoadingColumns] = useState(false);
+  const [activeTab, setActiveTab] = useState("dashboard");
 
   // Authentication is handled by SessionManager component
 
   useEffect(() => {
-    if (showStatusConfirmation) {
+    if (showStatusConfirmation || showExportModal) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "unset";
@@ -67,7 +89,7 @@ const SuperAdminDashboardPage = () => {
     return () => {
       document.body.style.overflow = "unset";
     };
-  }, [showStatusConfirmation]);
+  }, [showStatusConfirmation, showExportModal]);
 
   const getInterviewScore = (student, interviewerIndex) => {
     const interviewScores = student.interviewScores || [];
@@ -77,22 +99,77 @@ const SuperAdminDashboardPage = () => {
     return null;
   };
 
-  const handleExportToExcel = async () => {
+  const chartColors = [
+    "#ef3131",
+    "#0ea5e9",
+    "#22c55e",
+    "#f97316",
+    "#7c3aed",
+    "#14b8a6",
+  ];
+
+  const fetchExportColumns = async () => {
+    try {
+      setIsLoadingColumns(true);
+      setError("");
+      const response = await adminAPI.getExportColumns();
+      const columns = response.data || [];
+      setExportColumns(columns);
+      setSelectedColumns(
+        columns
+          .filter((column) => column.defaultSelected !== false)
+          .map((column) => column.key)
+      );
+    } catch (err) {
+      setError(
+        err.response?.data || "Failed to load export options. Please try again."
+      );
+      throw err;
+    } finally {
+      setIsLoadingColumns(false);
+    }
+  };
+
+  const handleExportButtonClick = async () => {
+    try {
+      if (!exportColumns.length) {
+        await fetchExportColumns();
+      }
+      setShowExportModal(true);
+    } catch {
+      // error already handled
+    }
+  };
+
+  const handleToggleColumn = (key) => {
+    setSelectedColumns((prev) =>
+      prev.includes(key)
+        ? prev.filter((columnKey) => columnKey !== key)
+        : [...prev, key]
+    );
+  };
+
+  const handleSelectAllColumns = () => {
+    setSelectedColumns(exportColumns.map((column) => column.key));
+  };
+
+  const handleClearColumns = () => {
+    setSelectedColumns([]);
+  };
+
+  const handleExportToExcel = async (columnsToInclude = selectedColumns) => {
     try {
       setError("");
-      const response = await adminAPI.exportStudentsToExcel();
+      const response = await adminAPI.exportStudentsToExcel(columnsToInclude);
 
-      // Create blob from response
       const blob = new Blob([response.data], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
 
-      // Create download link
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
 
-      // Get filename from response headers or use default
       const contentDisposition = response.headers["content-disposition"];
       let filename = "Students_Export.xlsx";
       if (contentDisposition) {
@@ -109,8 +186,26 @@ const SuperAdminDashboardPage = () => {
       window.URL.revokeObjectURL(url);
 
       setSuccessMessage("Excel file downloaded successfully!");
+    } catch (err) {
+      setError(err.response?.data || "Failed to export Excel file. Please try again.");
+      throw err;
+    }
+  };
+
+  const handleConfirmExport = async () => {
+    if (!selectedColumns.length) {
+      setError("Please select at least one column to export.");
+      return;
+    }
+
+    try {
+      setIsExporting(true);
+      await handleExportToExcel(selectedColumns);
+      setShowExportModal(false);
     } catch {
-      setError("Failed to export Excel file. Please try again.");
+      // errors handled above
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -223,6 +318,132 @@ const SuperAdminDashboardPage = () => {
         }).length || 0,
   };
 
+  const analyticsData = useMemo(() => {
+    const acceptanceCounts = {
+      accepted: 0,
+      rejected: 0,
+      waitlisted: 0,
+      pending: 0,
+    };
+    const schoolMap = new Map();
+    const genderMap = new Map();
+    const interviewerMap = new Map();
+    const dailyMap = new Map();
+
+    allStudents.forEach((student) => {
+      const statusValue = String(student.Status ?? student.status ?? "").trim();
+      switch (statusValue) {
+        case "2":
+          acceptanceCounts.accepted += 1;
+          break;
+        case "3":
+          acceptanceCounts.rejected += 1;
+          break;
+        case "4":
+          acceptanceCounts.waitlisted += 1;
+          break;
+        case "1":
+        default:
+          acceptanceCounts.pending += 1;
+          break;
+      }
+
+      const schoolType =
+        student.previousSchoolType ||
+        student.PreviousSchoolType ||
+        student.schoolName ||
+        student.SchoolName ||
+        "Not Specified";
+      schoolMap.set(schoolType, (schoolMap.get(schoolType) || 0) + 1);
+
+      const genderValue =
+        student.gender ||
+        student.Gender ||
+        student.sex ||
+        student.Sex ||
+        "Not Specified";
+      genderMap.set(genderValue, (genderMap.get(genderValue) || 0) + 1);
+
+      (student.interviewScores || []).forEach((score) => {
+        const interviewerName =
+          score.admin ||
+          score.interviewerName ||
+          (score.interviewerId ? `Interviewer ${score.interviewerId}` : "Interviewer");
+        const current = interviewerMap.get(interviewerName) || { total: 0, count: 0 };
+        current.total += Number(score.score) || 0;
+        current.count += 1;
+        interviewerMap.set(interviewerName, current);
+      });
+
+      const rawDate =
+        student.createdAt ||
+        student.CreatedAt ||
+        student.createdDate ||
+        student.createdOn ||
+        student.appliedAt ||
+        student.AppliedAt;
+
+      if (rawDate) {
+        const parsed = new Date(rawDate);
+        let isoDate = null;
+        if (!Number.isNaN(parsed.getTime())) {
+          isoDate = parsed.toISOString().slice(0, 10);
+        } else if (typeof rawDate === "string") {
+          const match = rawDate.match(/\d{4}-\d{2}-\d{2}/);
+          if (match) {
+            isoDate = match[0];
+          }
+        }
+        if (isoDate) {
+          dailyMap.set(isoDate, (dailyMap.get(isoDate) || 0) + 1);
+        }
+      }
+    });
+
+    const acceptanceData = [
+      { name: "Accepted", value: acceptanceCounts.accepted },
+      { name: "Rejected", value: acceptanceCounts.rejected },
+      { name: "Waitlisted", value: acceptanceCounts.waitlisted },
+      { name: "Pending", value: acceptanceCounts.pending },
+    ].filter((item) => item.value > 0);
+    if (!acceptanceData.length) acceptanceData.push({ name: "No Data", value: 1 });
+
+    const schoolData = Array.from(schoolMap.entries())
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 6);
+    if (!schoolData.length) schoolData.push({ name: "No Data", value: 0 });
+
+    const genderData = Array.from(genderMap.entries()).map(([name, value]) => ({
+      name,
+      value,
+    }));
+    if (!genderData.length) genderData.push({ name: "Not Specified", value: 1 });
+
+    const interviewerData = Array.from(interviewerMap.entries())
+      .map(([name, value]) => ({
+        name,
+        value: value.count ? Number((value.total / value.count).toFixed(2)) : 0,
+      }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 6);
+    if (!interviewerData.length)
+      interviewerData.push({ name: "No Scores Yet", value: 0 });
+
+    const dailyData = Array.from(dailyMap.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([iso, value]) => ({
+        name: new Date(iso).toLocaleDateString("en-GB", {
+          month: "short",
+          day: "numeric",
+        }),
+        value,
+      }));
+    if (!dailyData.length) dailyData.push({ name: "No Data", value: 0 });
+
+    return { acceptanceData, schoolData, genderData, interviewerData, dailyData };
+  }, [allStudents]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
@@ -326,7 +547,7 @@ const SuperAdminDashboardPage = () => {
             <div className="flex space-x-3">
               <Button
                 variant="outline"
-                onClick={handleExportToExcel}
+                onClick={handleExportButtonClick}
                 className="border-green-500 text-green-500 hover:bg-green-50"
               >
                 <svg
@@ -390,10 +611,32 @@ const SuperAdminDashboardPage = () => {
             </div>
           </div>
         </div>
+
+  <div className="bg-white border-b border-gray-200">
+    <div className="max-w-7xl mx-auto px-4 flex flex-wrap gap-2">
+      {[
+        { id: "dashboard", label: "Dashboard" },
+        { id: "charts", label: "Charts & Visual Analytics" },
+      ].map((tab) => (
+        <button
+          key={tab.id}
+          onClick={() => setActiveTab(tab.id)}
+          className={`px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${
+            activeTab === tab.id
+              ? "text-[#ef3131] border-[#ef3131]"
+              : "text-gray-500 border-transparent hover:text-gray-800"
+          }`}
+        >
+          {tab.label}
+        </button>
+      ))}
+    </div>
+  </div>
       </div>
 
-      <div className="py-8">
-        <div className="max-w-7xl mx-auto px-4">
+      {activeTab === "dashboard" && (
+        <div className="py-8">
+          <div className="max-w-7xl mx-auto px-4">
           {/* Metric Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <Card className="border-0 shadow-lg">
@@ -1038,21 +1281,161 @@ const SuperAdminDashboardPage = () => {
             </CardContent>
           </Card>
 
-          {/* Pagination */}
-          {totalItems > 0 && (
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
-              onPageSizeChange={handlePageSizeChange}
-              pageSize={pageSize}
-              totalItems={totalItems}
-              pageSizeOptions={[10, 20, 50]}
-              showPageSizeSelector={true}
-            />
-          )}
+            {/* Pagination */}
+            {totalItems > 0 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+                onPageSizeChange={handlePageSizeChange}
+                pageSize={pageSize}
+                totalItems={totalItems}
+                pageSizeOptions={[10, 20, 50]}
+                showPageSizeSelector={true}
+              />
+            )}
+          </div>
         </div>
-      </div>
+      )}
+
+      {activeTab === "charts" && (
+        <div className="py-8">
+          <div className="max-w-7xl mx-auto px-4 space-y-6">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+              <Card className="border-0 shadow-lg">
+                <CardHeader>
+                  <CardTitle>Accepted vs Rejected Students</CardTitle>
+                  <p className="text-sm text-gray-500">
+                    Distribution of application outcomes
+                  </p>
+                </CardHeader>
+                <CardContent className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={analyticsData.acceptanceData}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={50}
+                        outerRadius={80}
+                        paddingAngle={4}
+                      >
+                        {analyticsData.acceptanceData.map((entry, index) => (
+                          <Cell
+                            key={`acceptance-${entry.name}`}
+                            fill={chartColors[index % chartColors.length]}
+                          />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+
+              <Card className="border-0 shadow-lg">
+                <CardHeader>
+                  <CardTitle>Average Interview Scores</CardTitle>
+                  <p className="text-sm text-gray-500">
+                    Top interviewers by average scoring
+                  </p>
+                </CardHeader>
+                <CardContent className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={analyticsData.interviewerData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" hide />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar dataKey="value" fill="#ef3131" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <Card className="border-0 shadow-lg lg:col-span-2">
+                <CardHeader>
+                  <CardTitle>Applicants per School Type</CardTitle>
+                  <p className="text-sm text-gray-500">
+                    Top feeder schools submitting applications
+                  </p>
+                </CardHeader>
+                <CardContent className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={analyticsData.schoolData} layout="vertical">
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis type="number" allowDecimals={false} />
+                      <YAxis dataKey="name" type="category" width={140} />
+                      <Tooltip />
+                      <Bar dataKey="value" fill="#0ea5e9" radius={[0, 4, 4, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+
+              <Card className="border-0 shadow-lg">
+                <CardHeader>
+                  <CardTitle>Gender Distribution</CardTitle>
+                  <p className="text-sm text-gray-500">Applicants by gender</p>
+                </CardHeader>
+                <CardContent className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={analyticsData.genderData}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={80}
+                        label
+                      >
+                        {analyticsData.genderData.map((entry, index) => (
+                          <Cell
+                            key={`gender-${entry.name}`}
+                            fill={chartColors[index % chartColors.length]}
+                          />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card className="border-0 shadow-lg">
+              <CardHeader>
+                <CardTitle>Daily Applications</CardTitle>
+                <p className="text-sm text-gray-500">Rolling trend of submissions</p>
+              </CardHeader>
+              <CardContent className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={analyticsData.dailyData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis allowDecimals={false} />
+                    <Tooltip />
+                    <Line
+                      type="monotone"
+                      dataKey="value"
+                      stroke="#7c3aed"
+                      strokeWidth={3}
+                      dot={{ r: 4 }}
+                      activeDot={{ r: 6 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
 
       {/* Status Change Confirmation Modal */}
       {showStatusConfirmation && (
@@ -1133,6 +1516,118 @@ const SuperAdminDashboardPage = () => {
                 {isSubmitting ? "Updating..." : "Confirm Change"}
               </Button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {showExportModal && (
+        <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-3xl w-full shadow-2xl">
+            <div className="flex items-start justify-between mb-6">
+              <div>
+                <p className="text-sm uppercase text-gray-500 tracking-wide">
+                  Export Options
+                </p>
+                <h3 className="text-2xl font-bold text-gray-900">
+                  Customize Excel Columns
+                </h3>
+                <p className="text-sm text-gray-500">
+                  Choose which columns to include before downloading the Excel file.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowExportModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+                disabled={isExporting}
+              >
+                <svg className="h-5 w-5" viewBox="0 0 24 24" stroke="currentColor" fill="none">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            {isLoadingColumns ? (
+              <div className="py-16 text-center text-gray-500">
+                Loading available columns...
+              </div>
+            ) : (
+              <>
+                <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                  <div className="text-sm text-gray-600">
+                    {selectedColumns.length} of {exportColumns.length} columns selected
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleClearColumns}
+                      disabled={!selectedColumns.length || isExporting}
+                    >
+                      Clear All
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleSelectAllColumns}
+                      disabled={
+                        selectedColumns.length === exportColumns.length || isExporting
+                      }
+                    >
+                      Select All
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[360px] overflow-y-auto pr-1">
+                  {exportColumns.map((column) => (
+                    <label
+                      key={column.key}
+                      className="flex items-start gap-3 border border-gray-200 rounded-xl p-4 hover:border-[#ef3131]/60 transition-colors cursor-pointer"
+                      htmlFor={`column-${column.key}`}
+                    >
+                      <Checkbox
+                        id={`column-${column.key}`}
+                        checked={selectedColumns.includes(column.key)}
+                        onCheckedChange={() => handleToggleColumn(column.key)}
+                        disabled={isExporting}
+                      />
+                      <div>
+                        <p className="font-semibold text-gray-900">{column.label}</p>
+                        {column.description && (
+                          <p className="text-sm text-gray-500">{column.description}</p>
+                        )}
+                      </div>
+                    </label>
+                  ))}
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3 mt-6">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => setShowExportModal(false)}
+                    disabled={isExporting}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="button"
+                    className="flex-1 bg-green-600 hover:bg-green-700"
+                    onClick={handleConfirmExport}
+                    disabled={isExporting}
+                  >
+                    {isExporting ? "Preparing File..." : "Export Excel"}
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

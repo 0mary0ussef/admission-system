@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
 import Badge from "../components/ui/Badge";
+import { Presentation, Cpu, Puzzle, Users, Award } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -57,16 +58,27 @@ const AdminDashboardPage = () => {
     englishInterviewScore: 0,
     arabicInterviewScore: 0,
   });
-  const [interviewScore, setInterviewScore] = useState(0);
-  const [editingInterviewScore, setEditingInterviewScore] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [successMessage, setSuccessMessage] = useState(null);
 
   const [showInterviewConfirmation, setShowInterviewConfirmation] =
     useState(false);
   const [pendingInterviewChange, setPendingInterviewChange] = useState(null);
+  const [showScoreModal, setShowScoreModal] = useState(false);
+  const [scoreModalStudent, setScoreModalStudent] = useState(null);
+  const [scoreInputs, setScoreInputs] = useState({
+    presentation: "",
+    technical: "",
+    problemSolving: "",
+    communication: "",
+  });
+  const [scoreInputErrors, setScoreInputErrors] = useState({});
   const [showStudentDetailsModal, setShowStudentDetailsModal] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const scoreTotalPreview =
+    (Number(scoreInputs.presentation) || 0) +
+    (Number(scoreInputs.technical) || 0) +
+    (Number(scoreInputs.problemSolving) || 0) +
+    (Number(scoreInputs.communication) || 0);
 
   // Calculate percentage for a student
   const calculatePercentage = (student) => {
@@ -119,49 +131,103 @@ const AdminDashboardPage = () => {
     }
   };
 
-  // Handle edit interview score
-  const handleEditInterviewScore = (studentId) => {
+  const handleOpenScoreModal = (studentId) => {
     const student = students.find((s) => s.id === studentId);
-    if (student) {
-      setEditingInterviewScore(studentId);
-      setInterviewScore(student.interviewScore || 0);
+    if (!student) return;
+    setScoreModalStudent(student);
+    setScoreInputs({
+      presentation: "",
+      technical: "",
+      problemSolving: "",
+      communication: "",
+    });
+    setScoreInputErrors({});
+    setShowScoreModal(true);
+  };
+
+  const handleScoreInputChange = (field, rawValue) => {
+    let value = rawValue;
+    if (value === "") {
+      setScoreInputs((prev) => ({ ...prev, [field]: "" }));
+      return;
+    }
+
+    if (/^\d*\.?\d*$/.test(value)) {
+      const numeric = Math.min(10, Math.max(0, parseFloat(value)));
+      setScoreInputs((prev) => ({
+        ...prev,
+        [field]: Number.isNaN(numeric) ? "" : numeric,
+      }));
     }
   };
 
-  // Handle interview score input change
-  const handleInterviewScoreChange = (value) => {
-    // Allow empty string, decimal numbers, and partial decimal input
-    if (
-      value === "" ||
-      value === "." ||
-      value.endsWith(".") ||
-      /^\d*\.?\d*$/.test(value)
-    ) {
-      // Apply max validation immediately
-      const numValue = parseFloat(value);
-      if (!isNaN(numValue) && numValue > 40) {
-        setInterviewScore(40);
-      } else {
-        setInterviewScore(value === "" ? 0 : value);
+  const closeScoreModal = () => {
+    setShowScoreModal(false);
+    setScoreModalStudent(null);
+    setScoreInputErrors({});
+  };
+
+  const validateScoreInputs = () => {
+    const errors = {};
+    Object.entries(scoreInputs).forEach(([key, value]) => {
+      if (value === "" || isNaN(value)) {
+        errors[key] = "Required";
+      } else if (value < 0 || value > 10) {
+        errors[key] = "Score must be between 0 and 10";
       }
-    }
+    });
+    setScoreInputErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleScoreModalSubmit = (event) => {
+    event.preventDefault();
+    if (!scoreModalStudent) return;
+    if (!validateScoreInputs()) return;
+
+    const breakdown = {
+      presentation: Number(scoreInputs.presentation) || 0,
+      technical: Number(scoreInputs.technical) || 0,
+      problemSolving: Number(scoreInputs.problemSolving) || 0,
+      communication: Number(scoreInputs.communication) || 0,
+    };
+    const totalScore =
+      breakdown.presentation +
+      breakdown.technical +
+      breakdown.problemSolving +
+      breakdown.communication;
+
+    setPendingInterviewChange({
+      studentId: scoreModalStudent.id,
+      studentName: scoreModalStudent.fullName,
+      oldScore: scoreModalStudent.interviewScore || 0,
+      totalScore: Math.round(totalScore * 10) / 10,
+      breakdown,
+    });
+    closeScoreModal();
+    setShowInterviewConfirmation(true);
   };
 
   // Save interview score
   const saveInterviewScore = async () => {
-    if (editingInterviewScore) {
+    if (pendingInterviewChange?.studentId) {
       try {
         setIsSubmitting(true);
-        const scoreValue =
-          typeof interviewScore === "string"
-            ? parseFloat(interviewScore)
-            : interviewScore;
-        await adminAPI.setInterviewScore(editingInterviewScore, scoreValue);
+        await adminAPI.setInterviewScore(
+          pendingInterviewChange.studentId,
+          pendingInterviewChange.totalScore
+        );
 
         // Refresh data to get updated scores
         refreshData();
-        setEditingInterviewScore(null);
-        setInterviewScore(0);
+        setScoreModalStudent(null);
+        setScoreInputs({
+          presentation: "",
+          technical: "",
+          problemSolving: "",
+          communication: "",
+        });
+        setScoreInputErrors({});
       } catch (err) {
         setError(err.response?.data || "Failed to save interview score");
       } finally {
@@ -206,7 +272,7 @@ const AdminDashboardPage = () => {
     return () => {
       document.body.style.overflow = "unset";
     };
-  }, [showInterviewConfirmation]);
+  }, [showInterviewConfirmation, showScoreModal]);
 
   if (isLoading) {
     return (
@@ -684,84 +750,25 @@ const AdminDashboardPage = () => {
                           </div>
                         </TableCell>
                         <TableCell>
-                          {editingInterviewScore === student.id ? (
-                            <div className="space-y-2 min-w-[120px]">
-                              <div className="flex items-center">
-                                <Input
-                                  type="text"
-                                  min="0"
-                                  max="40"
-                                  placeholder="Score"
-                                  value={interviewScore}
-                                  onChange={(e) =>
-                                    handleInterviewScoreChange(e.target.value)
-                                  }
-                                  className="h-8"
-                                  disabled={isSubmitting}
-                                />
-                              </div>
-                              <div className="flex space-x-1">
-                                <Button
-                                  size="sm"
-                                  onClick={() => {
-                                    const scoreValue =
-                                      typeof interviewScore === "string"
-                                        ? parseFloat(interviewScore)
-                                        : interviewScore;
-                                    setPendingInterviewChange({
-                                      studentId: student.id,
-                                      newScore: scoreValue,
-                                      studentName: student.fullName,
-                                      oldScore: student.interviewScore || 0,
-                                    });
-                                    setShowInterviewConfirmation(true);
-                                  }}
-                                  className="bg-[#ef3131] hover:bg-red-600"
-                                  disabled={isSubmitting}
-                                >
-                                  Save
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => setEditingInterviewScore(null)}
-                                  disabled={isSubmitting}
-                                >
-                                  Cancel
-                                </Button>
-                              </div>
+                          <div className="flex flex-col gap-2 min-w-[160px]">
+                            <div className="text-sm font-medium">
+                              {typeof student.interviewScore === "number"
+                                ? student.interviewScore.toFixed(1)
+                                : student.interviewScore || 0}
+                              /40
                             </div>
-                          ) : (
-                            <div className="flex items-center space-x-2">
-                              <div className="text-sm font-medium">
-                                {typeof student.interviewScore === "number"
-                                  ? student.interviewScore.toFixed(1)
-                                  : student.interviewScore || 0}
-                                /40
-                              </div>
-                              <button
-                                onClick={() =>
-                                  handleEditInterviewScore(student.id)
-                                }
-                                className="text-gray-400 hover:text-gray-600"
-                                disabled={isSubmitting}
-                              >
-                                <svg
-                                  className="h-4 w-4"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                  />
-                                </svg>
-                              </button>
-                            </div>
-                          )}
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleOpenScoreModal(student.id)}
+                              disabled={isSubmitting}
+                              className="border-[#ef3131] text-[#ef3131] hover:bg-red-50"
+                            >
+                              {student.interviewScore > 0
+                                ? "Edit Score"
+                                : "Give Score"}
+                            </Button>
+                          </div>
                         </TableCell>
                         <TableCell>
                           <div className="font-bold text-blue-600">
@@ -819,6 +826,165 @@ const AdminDashboardPage = () => {
         )}
       </div>
 
+      {/* Interview Score Entry Modal */}
+      {showScoreModal && scoreModalStudent && (
+        <div className="fixed inset-0 backdrop-blur-sm bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-gradient-to-br from-white via-[#fff5f5] to-white rounded-3xl p-5 md:p-6 max-w-2xl w-full shadow-2xl border border-[#ffd6d6] max-h-[90vh] overflow-y-auto">
+            <div className="flex items-start justify-between mb-6">
+              <div>
+                <p className="text-xs font-semibold text-[#ef3131] uppercase tracking-[0.3em]">
+                  Interview Evaluation
+                </p>
+                <h3 className="text-3xl font-bold text-gray-900 mt-1">
+                  {scoreModalStudent.fullName}
+                </h3>
+                <p className="text-sm text-gray-500 mt-1">
+                  National ID ·{" "}
+                  <span className="font-semibold text-gray-700">
+                    {scoreModalStudent.nationalId}
+                  </span>
+                </p>
+              </div>
+              <button
+                onClick={closeScoreModal}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+                type="button"
+              >
+                <svg
+                  className="h-5 w-5"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  fill="none"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <form onSubmit={handleScoreModalSubmit}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {[
+                  {
+                    key: "presentation",
+                    label: "Presentation Skills",
+                    description: "Confidence, clarity and professionalism",
+                    icon: Presentation,
+                    accent: "from-red-50/80 to-red-100/80",
+                  },
+                  {
+                    key: "technical",
+                    label: "Technical / Software Skills",
+                    description: "Coding logic, tool familiarity",
+                    icon: Cpu,
+                    accent: "from-blue-50/80 to-blue-100/80",
+                  },
+                  {
+                    key: "problemSolving",
+                    label: "Problem-Solving & Logical Thinking",
+                    description: "Analytical depth, creativity",
+                    icon: Puzzle,
+                    accent: "from-emerald-50/80 to-emerald-100/80",
+                  },
+                  {
+                    key: "communication",
+                    label: "Communication & Teamwork",
+                    description: "Listening, collaboration, empathy",
+                    icon: Users,
+                    accent: "from-amber-50/80 to-amber-100/80",
+                  },
+                ].map((field) => {
+                  const Icon = field.icon;
+                  return (
+                    <label
+                      key={field.key}
+                      htmlFor={`score-${field.key}`}
+                      className={`block rounded-2xl p-5 bg-gradient-to-br ${field.accent} border border-white/80 shadow-sm hover:shadow-lg transition-all cursor-pointer`}
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="h-12 w-12 rounded-2xl bg-white text-[#ef3131] flex items-center justify-center shadow">
+                          <Icon className="h-6 w-6" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-base font-semibold text-gray-900">
+                            {field.label}
+                          </p>
+                          <p className="text-xs text-gray-600 mt-1 h-8">
+                            {field.description}
+                          </p>
+                          <Input
+                            id={`score-${field.key}`}
+                            type="text"
+                            min="0"
+                            max="10"
+                            step="0.5"
+                            value={scoreInputs[field.key]}
+                            onChange={(e) =>
+                              handleScoreInputChange(field.key, e.target.value)
+                            }
+                            className={`h-12 text-lg font-semibold bg-white/90 border-2 ${
+                              scoreInputErrors[field.key]
+                                ? "border-red-400"
+                                : "border-transparent"
+                            } mt-3 focus:ring-2 focus:ring-[#ef3131]/30`}
+                          />
+                          {scoreInputErrors[field.key] && (
+                            <p className="text-xs text-red-600 mt-2">
+                              {scoreInputErrors[field.key]}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </label>
+                  );
+                })}
+              </div>
+
+              <div className="mt-6 bg-white/80 border border-[#ffd6d6] rounded-2xl p-5 flex flex-wrap items-center justify-between gap-4 shadow-sm">
+                <div className="flex items-center gap-4">
+                  <div className="h-14 w-14 rounded-2xl bg-[#ef3131]/10 flex items-center justify-center text-[#ef3131]">
+                    <Award className="h-7 w-7" strokeWidth={1.8} />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Total Interview Score</p>
+                    <p className="text-4xl font-black text-[#ef3131] tracking-tight">
+                      {scoreTotalPreview}/40
+                    </p>
+                  </div>
+                </div>
+                <div className="text-sm text-gray-500 max-w-md">
+                  Please review each criterion carefully. You will confirm this
+                  breakdown before saving the score.
+                </div>
+              </div>
+
+              <div className="mt-6 flex flex-col sm:flex-row gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={closeScoreModal}
+                  className="flex-1"
+                  disabled={isSubmitting}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  className="flex-1 bg-[#ef3131] hover:bg-red-600"
+                  disabled={isSubmitting}
+                >
+                  Review & Submit
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Interview Score Confirmation Modal */}
       {showInterviewConfirmation && pendingInterviewChange && (
         <div className="fixed inset-0 backdrop-blur-sm bg-opacity-10 flex items-center justify-center z-50 p-4">
@@ -849,11 +1015,7 @@ const AdminDashboardPage = () => {
                 <span className="font-semibold text-gray-900">
                   {pendingInterviewChange.studentName}
                 </span>{" "}
-                to{" "}
-                <span className="font-semibold text-blue-600">
-                  {pendingInterviewChange.newScore}/40
-                </span>
-                ?
+                to the following?
               </p>
               <div className="bg-gray-50 rounded-lg p-3 text-sm">
                 <p className="font-medium text-gray-700 mb-1">
@@ -865,9 +1027,27 @@ const AdminDashboardPage = () => {
                 <p className="text-gray-600">
                   Current Score: {pendingInterviewChange.oldScore}/40
                 </p>
-                <p className="text-gray-600">
-                  New Score: {pendingInterviewChange.newScore}/40
-                </p>
+                <div className="mt-2 space-y-1 text-gray-700">
+                  <div>
+                    Presentation:{" "}
+                    {pendingInterviewChange.breakdown.presentation}/10
+                  </div>
+                  <div>
+                    Technical/Software:{" "}
+                    {pendingInterviewChange.breakdown.technical}/10
+                  </div>
+                  <div>
+                    Problem-Solving:{" "}
+                    {pendingInterviewChange.breakdown.problemSolving}/10
+                  </div>
+                  <div>
+                    Communication:{" "}
+                    {pendingInterviewChange.breakdown.communication}/10
+                  </div>
+                  <div className="border-t border-dashed border-gray-300 pt-2 font-semibold text-blue-600">
+                    Total Score: {pendingInterviewChange.totalScore}/40
+                  </div>
+                </div>
               </div>
             </div>
             <div className="flex space-x-3">
@@ -876,7 +1056,6 @@ const AdminDashboardPage = () => {
                 onClick={() => {
                   setShowInterviewConfirmation(false);
                   setPendingInterviewChange(null);
-                  setEditingInterviewScore(null);
                 }}
                 className="flex-1"
                 disabled={isSubmitting}
